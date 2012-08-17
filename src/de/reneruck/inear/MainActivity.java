@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import de.reneruck.inear.file.FileScanner;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,6 +30,8 @@ public class MainActivity extends Activity {
         this.appContext = (AppContext) getApplicationContext();
         this.audioBooksBaseDir = new File(this.appContext.getAudiobokkBaseDir());
         
+        initFileScanner();
+        
         if(this.audioBooksBaseDir != null && this.audioBooksBaseDir.exists())
         {
         	this.audioBookTitles = getAllAudiobooks();
@@ -38,6 +42,11 @@ public class MainActivity extends Activity {
         	audiobooksList.invalidate();
         }
     }
+
+	private void initFileScanner() {
+		FileScanner fileScanner = new FileScanner(this.appContext);
+		fileScanner.doInBackground();
+	}
 
 	private OnItemClickListener audiobookItemClickListener = new OnItemClickListener() {
     	@Override
