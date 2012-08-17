@@ -6,6 +6,7 @@ import android.app.Application;
 public class AppContext extends Application {
 
 	private String currentAudiobook;
+	private String audiobookBaseDir = "/sdcard/Audiobooks";
 
 	public String getCurrentAudiobook() {
 		return currentAudiobook;
@@ -13,5 +14,9 @@ public class AppContext extends Application {
 
 	public void setCurrentAudiobook(String currentAudiobook) {
 		this.currentAudiobook = currentAudiobook;
+	}
+
+	public String getAudiobokkBaseDir() {
+		return this.audiobookBaseDir;
 	}
 }

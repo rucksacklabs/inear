@@ -16,7 +16,7 @@ import android.widget.ListView;
 
 public class MainActivity extends Activity {
 
-	private File audioBooksBaseDir = new File("/sdcard/Audiobooks");
+	private File audioBooksBaseDir;
 	private List<String> audioBookTitles;
 	private AppContext appContext;
 	
@@ -24,7 +24,9 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
         this.appContext = (AppContext) getApplicationContext();
+        this.audioBooksBaseDir = new File(this.appContext.getAudiobokkBaseDir());
         
         if(this.audioBooksBaseDir != null && this.audioBooksBaseDir.exists())
         {
