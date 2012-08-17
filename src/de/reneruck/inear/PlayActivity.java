@@ -16,6 +16,10 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.Toast;
 
 public class PlayActivity extends Activity {
 
@@ -31,6 +35,8 @@ public class PlayActivity extends Activity {
         setContentView(R.layout.activity_play);
         this.appContext = (AppContext) getApplicationContext();
         
+        initializePlayControl();
+
         getAudiobookToPlay();
         getPlaylistToPlay();
 		initializeMediaplayer();
@@ -39,13 +45,26 @@ public class PlayActivity extends Activity {
 	private void initializeMediaplayer() {
     	this.mediaPlayer = new MediaPlayer();
     	this.mediaPlayer.setOnCompletionListener(this.trackFinishedListener);
-    	setNewDataSource();
     	this.mediaPlayer.setOnPreparedListener(this.preparedListener);
+    	this.mediaPlayer.setScreenOnWhilePlaying(true); 
+    	setNewDataSource();
     	this.mediaPlayer.prepareAsync();
 	}
 
+    private void initializePlayControl() {
+    	Button bottonNext = (Button) findViewById(R.id.button_next);
+    	bottonNext.setOnClickListener(this.nextButtonClickListener);
+    	
+    	Button bottonPlay = (Button) findViewById(R.id.button_play);
+    	bottonPlay.setOnClickListener(this.playButtonClickListener);
+    	
+    	Button bottonPrev = (Button) findViewById(R.id.button_prev);
+    	bottonPrev.setOnClickListener(this.prevButtonClickListener);
+	}
+	
 	private void setNewDataSource() {
 		try {
+			this.mediaPlayer.reset();
 			this.mediaPlayer.setDataSource(this.currentPlaylist.get(this.currentTrackNumber));
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
@@ -57,19 +76,15 @@ public class PlayActivity extends Activity {
 			e.printStackTrace();
 		}
 	}
-
+	
 	private OnPreparedListener preparedListener = new OnPreparedListener() {
 		
 		@Override
 		public void onPrepared(MediaPlayer mp) {
-			play();
+			mediaPlayer.start();
 		}
 	};
 
-	private void play() {
-		this.mediaPlayer.start();
-	}
-    
     private OnCompletionListener trackFinishedListener = new OnCompletionListener() {
 		
 		@Override
@@ -127,6 +142,37 @@ public class PlayActivity extends Activity {
         return true;
     }
 
+	private OnClickListener nextButtonClickListener = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			mediaPlayer.stop();
+			setNextTrack();
+		}
+	};
+	
+	private OnClickListener playButtonClickListener = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			if(mediaPlayer.isPlaying()){
+				mediaPlayer.pause();
+				((Button)v).setText("Play");
+			} else {
+				mediaPlayer.start();
+				((Button)v).setText("||");
+			}
+		}
+	};
+	
+	private OnClickListener prevButtonClickListener = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			Toast.makeText(getApplicationContext(), R.string.no_way_back, Toast.LENGTH_SHORT).show();
+		}
+	};
+	
     @Override
     protected void onStop() {
     	super.onStop();
