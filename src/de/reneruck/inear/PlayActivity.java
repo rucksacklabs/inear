@@ -15,6 +15,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,17 +24,21 @@ import android.widget.Toast;
 
 public class PlayActivity extends Activity {
 
-    private AppContext appContext;
+    private static final String TAG = "PlayActivity";
+	private AppContext appContext;
 	private String currentAudiobook;
 	private List<String> currentPlaylist = new LinkedList<String>();
 	private MediaPlayer mediaPlayer;
 	private int currentTrackNumber = 0;
+	private Bookmark currentBookmark;
+	private DatabaseManager databaseManager;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         this.appContext = (AppContext) getApplicationContext();
+        this.databaseManager = this.appContext.getDatabaseManager();
         
         initializePlayControl();
 
@@ -176,13 +181,32 @@ public class PlayActivity extends Activity {
     @Override
     protected void onStop() {
     	super.onStop();
-    	createBookmark();
+    	createOrUpdateBookmark();
     	this.mediaPlayer.stop();
     	this.mediaPlayer.release();
     	this.mediaPlayer = null;
     }
 
-	private void createBookmark() {
-		this.mediaPlayer.getCurrentPosition();
+	private void createOrUpdateBookmark() {
+		if(this.currentBookmark != null)
+		{
+			this.currentBookmark.setTrackNumber(this.currentTrackNumber);
+			this.currentBookmark.setPlaybackPosition(this.mediaPlayer.getCurrentPosition());
+		} else {
+			this.currentBookmark = new Bookmark(this.currentAudiobook, this.currentTrackNumber, this.mediaPlayer.getCurrentPosition());
+		}
+		storeBookmark();
+	}
+
+	private void storeBookmark() {
+		if(this.databaseManager != null)
+		{
+			AsyncStoreBookmark storeBookmarkTask = new AsyncStoreBookmark(this.databaseManager);
+			storeBookmarkTask.doInBackground(this.currentBookmark);
+		} else {
+			String string = getString(R.string.no_databasemanager);
+			Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
+			Log.e(TAG, string);
+		}
 	}
 }

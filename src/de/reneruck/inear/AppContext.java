@@ -7,7 +7,14 @@ public class AppContext extends Application {
 
 	private String currentAudiobook;
 	private String audiobookBaseDir = "/sdcard/Audiobooks";
+	private DatabaseManager databaseManager;
 
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		this.databaseManager = new DatabaseManager(this);
+	}
+	
 	public String getCurrentAudiobook() {
 		return currentAudiobook;
 	}
@@ -18,5 +25,13 @@ public class AppContext extends Application {
 
 	public String getAudiobokkBaseDir() {
 		return this.audiobookBaseDir;
+	}
+
+	public DatabaseManager getDatabaseManager() {
+		return databaseManager;
+	}
+
+	public void setDatabaseManager(DatabaseManager databaseManager) {
+		this.databaseManager = databaseManager;
 	}
 }
