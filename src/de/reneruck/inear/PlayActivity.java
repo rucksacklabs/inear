@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 public class PlayActivity extends Activity {
@@ -77,13 +78,13 @@ public class PlayActivity extends Activity {
 	}
 
     private void initializePlayControl() {
-    	Button bottonNext = (Button) findViewById(R.id.button_next);
+    	ImageView bottonNext = (ImageView) findViewById(R.id.button_next);
     	bottonNext.setOnClickListener(this.nextButtonClickListener);
     	
-    	Button bottonPlay = (Button) findViewById(R.id.button_play);
+    	ImageView bottonPlay = (ImageView) findViewById(R.id.button_play);
     	bottonPlay.setOnClickListener(this.playButtonClickListener);
     	
-    	Button bottonPrev = (Button) findViewById(R.id.button_prev);
+    	ImageView bottonPrev = (ImageView) findViewById(R.id.button_prev);
     	bottonPrev.setOnClickListener(this.prevButtonClickListener);
 	}
 	
@@ -209,10 +210,10 @@ public class PlayActivity extends Activity {
 		public void onClick(View v) {
 			if(mediaPlayer.isPlaying()){
 				mediaPlayer.pause();
-				((Button)v).setText("->");
+				((ImageView)v).setImageResource(android.R.drawable.ic_media_play);
 			} else {
 				mediaPlayer.start();
-				((Button)v).setText("||");
+				((ImageView)v).setImageResource(android.R.drawable.ic_media_pause);
 			}
 		}
 	};
