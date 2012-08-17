@@ -38,7 +38,6 @@ public class FileScanner extends AsyncTask<Void, Void, Void> {
 				}
 			}
 		}
-		
 		return null;
 	}
 
@@ -49,8 +48,20 @@ public class FileScanner extends AsyncTask<Void, Void, Void> {
 		
 		for (File dir : listFiles) {
 			mediaFiles.addAll(getMediafiles(dir));
+			createNoMediaFile(dir);
 		}
 		createAndWritePlaylist(audiobookDir, mediaFiles);
+	}
+
+	private void createNoMediaFile(File dir) {
+		File noMediaFile = new File(dir.getAbsolutePath() + File.separator + ".nomedia");
+		if(noMediaFile == null || noMediaFile.exists()){
+			try {
+				noMediaFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void createAndWritePlaylist(File audiobookDir, List<String> mediaFiles) {
