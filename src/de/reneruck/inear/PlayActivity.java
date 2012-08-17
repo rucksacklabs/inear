@@ -44,11 +44,18 @@ public class PlayActivity extends Activity {
 
         getAudiobookToPlay();
         getPlaylistToPlay();
-        getStoredBookmark();
-        applyBookmarkValues();
-		initializeMediaplayer();
     }
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		getStoredBookmark();
+		applyBookmarkValues();
+		initializeMediaplayer();
+		this.mediaPlayer.setOnPreparedListener(this.resumePreparedListener);
+		this.mediaPlayer.prepareAsync();
+	}
+	
 	private void applyBookmarkValues() {
 		if(this.currentBookmark != null)
 		{
@@ -56,13 +63,13 @@ public class PlayActivity extends Activity {
 		}
 	}
 
+	
 	private void initializeMediaplayer() {
     	this.mediaPlayer = new MediaPlayer();
     	this.mediaPlayer.setOnCompletionListener(this.trackFinishedListener);
-    	this.mediaPlayer.setOnPreparedListener(this.preparedListener);
+    	this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
     	this.mediaPlayer.setScreenOnWhilePlaying(true);
     	setNewDataSource();
-    	this.mediaPlayer.prepareAsync();
 	}
 
     private void initializePlayControl() {
@@ -91,7 +98,24 @@ public class PlayActivity extends Activity {
 		}
 	}
 	
-	private OnPreparedListener preparedListener = new OnPreparedListener() {
+	private OnPreparedListener resumePreparedListener = new OnPreparedListener() {
+		
+		@Override
+		public void onPrepared(MediaPlayer mp) {
+			resumeFromBookmark();
+		}
+
+	};
+	
+	private void resumeFromBookmark() {
+		if(this.currentBookmark != null)
+		{
+			this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
+		}
+		this.mediaPlayer.start();
+	}
+	
+	private OnPreparedListener nextTrackPreparedListener = new OnPreparedListener() {
 		
 		@Override
 		public void onPrepared(MediaPlayer mp) {
@@ -108,11 +132,21 @@ public class PlayActivity extends Activity {
 
 	};
 	
+	private void setPreveriousTrack() {
+		this.currentTrackNumber--;
+		if(this.currentTrackNumber > 0)
+		{
+			setNewDataSource();
+			this.mediaPlayer.prepareAsync();
+		}
+	}
+	
 	private void setNextTrack() {
 		this.currentTrackNumber++;
 		if(this.currentTrackNumber < this.currentPlaylist.size())
 		{
 			setNewDataSource();
+			this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
 			this.mediaPlayer.prepareAsync();
 		}
 	}
@@ -183,13 +217,14 @@ public class PlayActivity extends Activity {
 		
 		@Override
 		public void onClick(View v) {
-			Toast.makeText(getApplicationContext(), R.string.no_way_back, Toast.LENGTH_SHORT).show();
+			mediaPlayer.stop();
+			setNextTrack();
 		}
 	};
 	
     @Override
-    protected void onStop() {
-    	super.onStop();
+    protected void onPause() {
+    	super.onPause();
     	createOrUpdateBookmark();
     	this.mediaPlayer.stop();
     	this.mediaPlayer.release();
