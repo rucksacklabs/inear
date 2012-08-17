@@ -16,7 +16,7 @@ public class AsyncStoreBookmark extends AsyncTask<Bookmark, Void, Void> {
 
 	@Override
 	protected Void doInBackground(Bookmark... params) {
-		if(params != null && params.length > 1)
+		if(params != null && params.length > 0)
 		{
 			Bookmark bookmarkToStore = params[0];
 			DatabaseHelper dbHelper = this.databaseManager.getDbHelper();

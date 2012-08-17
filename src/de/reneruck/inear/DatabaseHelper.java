@@ -10,8 +10,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String CREATE_BOOKMARKS = "CREATE  TABLE IF NOT EXISTS `" + DbConfigs.TABLE_BOOKMARKS+ "`" +
 			" (`" + DbConfigs.FIELD_BOOKMARK_ID + "` INTEGER  PRIMARY KEY AUTOINCREMENT ," +
-			"`" + DbConfigs.FIELD_AUDIOBOOK_NAME + "` TEXT NULL)" +
-			"`" + DbConfigs.FIELD_TRACK + "` INTEGER NULL)" +
+			"`" + DbConfigs.FIELD_AUDIOBOOK_NAME + "` TEXT NULL ," +
+			"`" + DbConfigs.FIELD_TRACK + "` INTEGER NULL ," +
 			"`" + DbConfigs.FIELD_PLAYBACK_POS+ "` INTEGER NULL)";
 
 	public DatabaseHelper(Context context, String name, CursorFactory factory, int version) {

@@ -44,14 +44,23 @@ public class PlayActivity extends Activity {
 
         getAudiobookToPlay();
         getPlaylistToPlay();
+        getStoredBookmark();
+        applyBookmarkValues();
 		initializeMediaplayer();
     }
+
+	private void applyBookmarkValues() {
+		if(this.currentBookmark != null)
+		{
+			this.currentTrackNumber = this.currentBookmark.getTrackNumber();
+		}
+	}
 
 	private void initializeMediaplayer() {
     	this.mediaPlayer = new MediaPlayer();
     	this.mediaPlayer.setOnCompletionListener(this.trackFinishedListener);
     	this.mediaPlayer.setOnPreparedListener(this.preparedListener);
-    	this.mediaPlayer.setScreenOnWhilePlaying(true); 
+    	this.mediaPlayer.setScreenOnWhilePlaying(true);
     	setNewDataSource();
     	this.mediaPlayer.prepareAsync();
 	}
@@ -162,7 +171,7 @@ public class PlayActivity extends Activity {
 		public void onClick(View v) {
 			if(mediaPlayer.isPlaying()){
 				mediaPlayer.pause();
-				((Button)v).setText("Play");
+				((Button)v).setText("->");
 			} else {
 				mediaPlayer.start();
 				((Button)v).setText("||");
@@ -209,4 +218,10 @@ public class PlayActivity extends Activity {
 			Log.e(TAG, string);
 		}
 	}
+	
+	private void getStoredBookmark() {
+		AsyncGetBookmark getBookmarkTask = new AsyncGetBookmark(this.databaseManager);
+		this.currentBookmark = getBookmarkTask.doInBackground(this.currentAudiobook);
+	}
+
 }
