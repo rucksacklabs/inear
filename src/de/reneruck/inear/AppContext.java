@@ -2,12 +2,13 @@ package de.reneruck.inear;
 
 import de.reneruck.inear.db.DatabaseManager;
 import android.app.Application;
+import android.os.Environment;
 
 
 public class AppContext extends Application {
 
 	private String currentAudiobook;
-	private String audiobookBaseDir = "/sdcard/Audiobooks";
+	private String audiobookBaseDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Audiobooks";
 	private DatabaseManager databaseManager;
 
 	@Override

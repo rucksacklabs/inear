@@ -10,22 +10,25 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.reneruck.inear.db.AsyncGetBookmark;
-import de.reneruck.inear.db.AsyncStoreBookmark;
-import de.reneruck.inear.db.DatabaseManager;
-
 import android.app.Activity;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.view.View.OnDragListener;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import android.widget.Toast;
+import de.reneruck.inear.db.AsyncGetBookmark;
+import de.reneruck.inear.db.AsyncStoreBookmark;
+import de.reneruck.inear.db.DatabaseManager;
 
 public class PlayActivity extends Activity {
 
@@ -37,6 +40,7 @@ public class PlayActivity extends Activity {
 	private int currentTrackNumber = 0;
 	private Bookmark currentBookmark;
 	private DatabaseManager databaseManager;
+	private SeekBar seekbar;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +60,7 @@ public class PlayActivity extends Activity {
 		super.onResume();
 		getStoredBookmark();
 		applyBookmarkValues();
+		setTextIndikator();
 		initializeMediaplayer();
 		this.mediaPlayer.setOnPreparedListener(this.resumePreparedListener);
 		this.mediaPlayer.prepareAsync();
@@ -86,6 +91,9 @@ public class PlayActivity extends Activity {
     	
     	ImageView bottonPrev = (ImageView) findViewById(R.id.button_prev);
     	bottonPrev.setOnClickListener(this.prevButtonClickListener);
+    	
+		this.seekbar = (SeekBar) findViewById(R.id.seekBar1);
+		this.seekbar.setOnSeekBarChangeListener(this.onSeekbarDragListener);
 	}
 	
 	private void setNewDataSource() {
@@ -110,11 +118,17 @@ public class PlayActivity extends Activity {
 			resumeFromBookmark();
 		}
 
+
 	};
+	private void setIndicator() {
+		this.seekbar.setMax(this.mediaPlayer.getDuration());
+		this.seekbar.setProgress(this.currentBookmark.getPlaybackPosition());
+	}
 	
 	private void resumeFromBookmark() {
 		if(this.currentBookmark != null)
 		{
+			setIndicator();
 			this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
 		}
 		this.mediaPlayer.start();
@@ -124,6 +138,8 @@ public class PlayActivity extends Activity {
 		
 		@Override
 		public void onPrepared(MediaPlayer mp) {
+			seekbar.setMax(mediaPlayer.getDuration());
+			seekbar.setProgress(0);
 			mediaPlayer.start();
 		}
 	};
@@ -136,6 +152,29 @@ public class PlayActivity extends Activity {
 		}
 
 	};
+	
+	private OnSeekBarChangeListener onSeekbarDragListener = new OnSeekBarChangeListener() {
+
+		private int progress;
+		
+		@Override
+		public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
+			this.progress = progress;
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+			mediaPlayer.pause();
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			mediaPlayer.seekTo(progress);
+			mediaPlayer.start();
+		}
+		
+	};
+
 	
 	private void setPreveriousTrack() {
 		this.currentTrackNumber--;
@@ -151,9 +190,15 @@ public class PlayActivity extends Activity {
 		if(this.currentTrackNumber < this.currentPlaylist.size())
 		{
 			setNewDataSource();
+			setTextIndikator();
 			this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
 			this.mediaPlayer.prepareAsync();
 		}
+	}
+
+	private void setTextIndikator() {
+		TextView text = (TextView) findViewById(R.id.text_currentTrack);
+		text.setText(this.currentAudiobook + " - " + this.currentPlaylist.get(this.currentTrackNumber).replace(this.appContext.getAudiobokkBaseDir(), " ").trim());
 	}
 
 	private void getPlaylistToPlay() {

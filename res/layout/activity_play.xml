@@ -9,26 +9,17 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:padding="@dimen/padding_medium"
-        android:text="@string/hello_world"
-        tools:context=".PlayActivity" />
+        android:singleLine="true"
+        style="@android:style/TextAppearance.DeviceDefault.Medium"
+        android:text="@string/hello_world"/>
 
     <SeekBar
         android:id="@+id/seekBar1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginTop="40dp"
-        android:paddingBottom="20dip"
-        android:paddingTop="20dip" />
-
-<!--     <ImageView -->
-<!--         android:id="@+id/imageView2" -->
-<!--         android:layout_width="wrap_content" -->
-<!--         android:layout_height="wrap_content" -->
-<!--         android:layout_above="@+id/mediaController1" -->
-<!--         android:layout_centerHorizontal="true" -->
-<!--         android:src="@android:drawable/ic_media_play" /> -->
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="25dip" />
 
     <ImageView
         android:id="@+id/button_play"
