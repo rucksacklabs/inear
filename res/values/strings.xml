@@ -7,5 +7,6 @@
     <string name="title_activity_play">PlayActivity</string>
     <string name="no_way_back">Kein zurück mehr!!!</string>
     <string name="no_databasemanager">No DatabaseManager available to store Boomark</string>
+    <string name="last_played">Last Played</string>
 
 </resources>
