@@ -10,17 +10,17 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnDragListener;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -48,6 +48,9 @@ public class PlayActivity extends Activity {
         setContentView(R.layout.activity_play);
         this.appContext = (AppContext) getApplicationContext();
         this.databaseManager = this.appContext.getDatabaseManager();
+        
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
         
         initializePlayControl();
 
@@ -240,6 +243,15 @@ public class PlayActivity extends Activity {
         return true;
     }
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+        case android.R.id.home:
+        	finish();
+		}
+		return true;
+	}
+	
 	private OnClickListener nextButtonClickListener = new OnClickListener() {
 		
 		@Override
