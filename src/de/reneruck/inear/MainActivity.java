@@ -7,8 +7,12 @@ import java.util.List;
 import de.reneruck.inear.file.FileScanner;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,6 +22,7 @@ import android.widget.ListView;
 
 public class MainActivity extends Activity {
 
+	private static final String LAST_PLAYED = "lastPlayed";
 	private File audioBooksBaseDir;
 	private List<String> audioBookTitles;
 	private AppContext appContext;
@@ -67,5 +72,13 @@ public class MainActivity extends Activity {
         return true;
     }
 
+	@Override
+	protected void onStop() {
+		super.onStop();
+		SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
+		Editor editor = preferences.edit();
+		editor.putString(LAST_PLAYED, this.appContext.getCurrentAudiobook());
+		editor.commit();
+	}
     
 }
