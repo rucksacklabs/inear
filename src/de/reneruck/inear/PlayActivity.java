@@ -10,6 +10,10 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.reneruck.inear.db.AsyncGetBookmark;
+import de.reneruck.inear.db.AsyncStoreBookmark;
+import de.reneruck.inear.db.DatabaseManager;
+
 import android.app.Activity;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;

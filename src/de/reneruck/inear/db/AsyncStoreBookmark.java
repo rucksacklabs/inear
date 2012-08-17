@@ -1,5 +1,7 @@
-package de.reneruck.inear;
+package de.reneruck.inear.db;
 
+import de.reneruck.inear.Bookmark;
+import de.reneruck.inear.DbConfigs;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -16,7 +18,7 @@ public class AsyncStoreBookmark extends AsyncTask<Bookmark, Void, Void> {
 	}
 
 	@Override
-	protected Void doInBackground(Bookmark... params) {
+	public Void doInBackground(Bookmark... params) {
 		if(params != null && params.length > 0)
 		{
 			Bookmark bookmarkToStore = params[0];

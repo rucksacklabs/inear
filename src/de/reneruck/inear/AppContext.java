@@ -1,5 +1,6 @@
 package de.reneruck.inear;
 
+import de.reneruck.inear.db.DatabaseManager;
 import android.app.Application;
 
 
