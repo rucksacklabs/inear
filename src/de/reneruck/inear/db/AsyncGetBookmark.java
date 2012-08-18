@@ -1,7 +1,6 @@
 package de.reneruck.inear.db;
 
 import de.reneruck.inear.Bookmark;
-import de.reneruck.inear.DbConfigs;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;

@@ -1,4 +1,4 @@
-package de.reneruck.inear;
+package de.reneruck.inear.db;
 
 public class DbConfigs {
 

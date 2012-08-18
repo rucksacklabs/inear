@@ -1,7 +1,6 @@
 package de.reneruck.inear.db;
 
 import de.reneruck.inear.Bookmark;
-import de.reneruck.inear.DbConfigs;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;

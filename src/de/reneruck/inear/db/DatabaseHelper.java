@@ -1,6 +1,5 @@
 package de.reneruck.inear.db;
 
-import de.reneruck.inear.DbConfigs;
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;

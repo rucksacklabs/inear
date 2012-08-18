@@ -1,6 +1,5 @@
 package de.reneruck.inear.db;
 
-import de.reneruck.inear.DbConfigs;
 import android.content.Context;
 
 public class DatabaseManager {
