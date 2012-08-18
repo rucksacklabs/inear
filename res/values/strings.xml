@@ -8,5 +8,10 @@
     <string name="no_way_back">Kein zurück mehr!!!</string>
     <string name="no_databasemanager">No DatabaseManager available to store Boomark</string>
     <string name="last_played">Last Played</string>
+    <string name="menu_playlist">Playlist</string>
+    
+    <string name="pref_base_dir">Audiobook Base Dir</string>
+    <string name="pref_base_dir_summary">Define where the App is looking for Audiobooks</string>
+    <string name="pref_base_dir_default">/sdcard/Audiobooks</string>
 
 </resources>

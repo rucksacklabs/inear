@@ -4,21 +4,22 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import de.reneruck.inear.file.FileScanner;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import de.reneruck.inear.file.FileScanner;
+import de.reneruck.inear.settings.SettingsActivity;
 
 public class MainActivity extends Activity {
 
@@ -33,26 +34,29 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         this.appContext = (AppContext) getApplicationContext();
-        this.audioBooksBaseDir = new File(this.appContext.getAudiobokkBaseDir());
-        
-        initFileScanner();
-        
-        if(this.audioBooksBaseDir != null && this.audioBooksBaseDir.exists())
-        {
-        	this.audioBookTitles = getAllAudiobooks();
-        	ListView audiobooksList = (ListView) findViewById(R.id.audiobooklist);
-        	ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, this.audioBookTitles);
-        	audiobooksList.setAdapter(listAdapter);
-        	audiobooksList.setOnItemClickListener(this.audiobookItemClickListener);
-        	audiobooksList.invalidate();
-        }
     }
 
-	private void initFileScanner() {
-		FileScanner fileScanner = new FileScanner(this.appContext);
-		fileScanner.doInBackground();
-	}
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	this.appContext.readSettings();
+    	this.audioBooksBaseDir = new File(this.appContext.getAudiobokkBaseDir());
+    	
+    	if(this.audioBooksBaseDir != null && this.audioBooksBaseDir.exists())
+    	{
+    		getAllAudiobooks();
+    		initializeAndshowAudiobookList();
+    	}
+    }
 
+	private void initializeAndshowAudiobookList() {
+		ListView audiobooksList = (ListView) findViewById(R.id.audiobooklist);
+		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, this.audioBookTitles);
+		audiobooksList.setAdapter(listAdapter);
+		audiobooksList.setOnItemClickListener(this.audiobookItemClickListener);
+		audiobooksList.invalidate();
+	}
+    
 	private OnItemClickListener audiobookItemClickListener = new OnItemClickListener() {
     	@Override
     	public void onItemClick(AdapterView<?> arg0, View view, int pos, long id) {
@@ -62,8 +66,8 @@ public class MainActivity extends Activity {
     	}
 	};
 	
-    private List<String> getAllAudiobooks() {
-    	return Arrays.asList(this.audioBooksBaseDir.list());
+    private void getAllAudiobooks() {
+    	this.audioBookTitles = Arrays.asList(this.audioBooksBaseDir.list());
 	}
 
 	@Override
@@ -71,6 +75,25 @@ public class MainActivity extends Activity {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+        case android.R.id.home:
+        	closeApp();
+        	break;
+        case R.id.menu_settings:
+        	Intent i = new Intent(getApplicationContext(), SettingsActivity.class);
+        	startActivity(i);
+        	break;
+		}
+		return true;
+	}
+	
+	private void closeApp() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	protected void onStop() {
