@@ -7,7 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Application;
@@ -22,7 +22,7 @@ public class AppContext extends Application {
 	private String currentAudiobook;
 	private String audiobookBaseDir = "";
 	private DatabaseManager databaseManager;
-	private List<String> currentPlaylist = new LinkedList<String>();
+	private List<String> currentPlaylist = new ArrayList<String>();
 	private boolean autoplay;
 
 	@Override
@@ -83,6 +83,7 @@ public class AppContext extends Application {
 
 	private void readPlaylistForCurrentAudiobook() {
     	String playlist = this.audiobookBaseDir + File.separator + this.currentAudiobook + File.separator + this.currentAudiobook + ".m3u";
+    	this.currentPlaylist.clear();
 		readPlaylist(playlist);
 	}
 

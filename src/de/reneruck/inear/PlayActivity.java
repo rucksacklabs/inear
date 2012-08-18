@@ -81,7 +81,7 @@ public class PlayActivity extends Activity {
 		
 		getStoredBookmark();
 		applyBookmarkValues();
-		setTrackNameIndikator();
+		setCurrentTrackNameIndikator();
 		initializeMediaplayer();
 		setNewDataSource();
 		initializeSeekbarUpdateThread();
@@ -179,7 +179,10 @@ public class PlayActivity extends Activity {
 	}
 	
 	private void setMediaplayerToBookmarkPosition() {
-		this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
+		if(this.currentBookmark != null)
+		{
+			this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
+		}
 	}
 	
 	private void setSeekbarToBookmarkPosition() {
@@ -222,6 +225,8 @@ public class PlayActivity extends Activity {
 	
 	private OnSeekBarChangeListener onSeekbarDragListener = new OnSeekBarChangeListener() {
 
+		private boolean wasPlaying;
+
 		@Override
 		public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
 			seekbar.setProgress(progress);
@@ -230,13 +235,14 @@ public class PlayActivity extends Activity {
 
 		@Override
 		public void onStartTrackingTouch(SeekBar seekBar) {
+			this.wasPlaying = mediaPlayer.isPlaying();
 			mediaPlayer.pause();
 		}
 
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
 			mediaPlayer.seekTo(seekBar.getProgress());
-			mediaPlayer.start();
+			if(this.wasPlaying) mediaPlayer.start();
 		}
 		
 	};
@@ -246,8 +252,9 @@ public class PlayActivity extends Activity {
 		this.currentTrackNumber--;
 		if(this.currentTrackNumber > 0)
 		{
-			setNewDataSource();
-			this.mediaPlayer.prepareAsync();
+			switchTrack();
+		} else {
+			this.currentTrackNumber = 0;
 		}
 	}
 	
@@ -255,14 +262,18 @@ public class PlayActivity extends Activity {
 		this.currentTrackNumber++;
 		if(this.currentTrackNumber < this.appContext.getCurrentPlaylist().size())
 		{
-			setNewDataSource();
-			setTrackNameIndikator();
-			this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
-			this.mediaPlayer.prepareAsync();
+			switchTrack();
 		}
 	}
 
-	private void setTrackNameIndikator() {
+	private void switchTrack() {
+		setNewDataSource();
+		setCurrentTrackNameIndikator();
+		this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
+		this.mediaPlayer.prepareAsync();
+	}
+
+	private void setCurrentTrackNameIndikator() {
 		TextView text = (TextView) findViewById(R.id.text_currentTrack);
 		text.setText(this.currentAudiobook + " - " + this.appContext.getCurrentPlaylist().get(this.currentTrackNumber).replace(this.appContext.getAudiobokkBaseDir(), " ").trim());
 	}
