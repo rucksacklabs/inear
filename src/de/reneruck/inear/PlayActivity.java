@@ -130,15 +130,12 @@ public class PlayActivity extends Activity {
 
 
 	};
-	private void setIndicator() {
-		this.seekbar.setMax(this.mediaPlayer.getDuration());
-		this.seekbar.setProgress(this.currentBookmark.getPlaybackPosition());
-	}
 	
 	private void resumeFromBookmark() {
+		setSeekbar();
 		if(this.currentBookmark != null)
 		{
-			setIndicator();
+			this.seekbar.setProgress(this.currentBookmark.getPlaybackPosition());
 			this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
 		}
 		if(this.appContext.isAutoplay()){
@@ -150,11 +147,16 @@ public class PlayActivity extends Activity {
 		
 		@Override
 		public void onPrepared(MediaPlayer mp) {
-			seekbar.setMax(mediaPlayer.getDuration());
-			seekbar.setProgress(0);
+			setSeekbar();
 			mediaPlayer.start();
 		}
+
 	};
+	
+	private void setSeekbar() {
+		seekbar.setMax(mediaPlayer.getDuration());
+		seekbar.setProgress(0);
+	}
 
     private OnCompletionListener trackFinishedListener = new OnCompletionListener() {
 		
@@ -167,11 +169,8 @@ public class PlayActivity extends Activity {
 	
 	private OnSeekBarChangeListener onSeekbarDragListener = new OnSeekBarChangeListener() {
 
-		private int progress;
-		
 		@Override
 		public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
-			this.progress = progress;
 		}
 
 		@Override
@@ -181,7 +180,7 @@ public class PlayActivity extends Activity {
 
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
-			mediaPlayer.seekTo(progress);
+			mediaPlayer.seekTo(seekBar.getProgress());
 			mediaPlayer.start();
 		}
 		
