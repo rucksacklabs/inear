@@ -1,17 +1,6 @@
 package de.reneruck.inear;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import javax.net.ssl.HandshakeCompletedListener;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -19,8 +8,6 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
-import android.os.Handler.Callback;
-import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,7 +27,6 @@ public class PlayActivity extends Activity {
     private static final String TAG = "PlayActivity";
 	private AppContext appContext;
 	private String currentAudiobook;
-	private List<String> currentPlaylist = new LinkedList<String>();
 	private MediaPlayer mediaPlayer;
 	private int currentTrackNumber = 0;
 	private Bookmark currentBookmark;
@@ -61,7 +47,6 @@ public class PlayActivity extends Activity {
         initializePlayControl();
         
         getAudiobookToPlay();
-        getPlaylistToPlay();
     }
 
 	private void initializeSeekbarUpdateThread() {
@@ -144,7 +129,7 @@ public class PlayActivity extends Activity {
 	private void setNewDataSource() {
 		try {
 			this.mediaPlayer.reset();
-			this.mediaPlayer.setDataSource(this.currentPlaylist.get(this.currentTrackNumber));
+			this.mediaPlayer.setDataSource(this.appContext.getCurrentPlaylist().get(this.currentTrackNumber));
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {
@@ -268,7 +253,7 @@ public class PlayActivity extends Activity {
 	
 	private void setNextTrack() {
 		this.currentTrackNumber++;
-		if(this.currentTrackNumber < this.currentPlaylist.size())
+		if(this.currentTrackNumber < this.appContext.getCurrentPlaylist().size())
 		{
 			setNewDataSource();
 			setTrackNameIndikator();
@@ -279,36 +264,7 @@ public class PlayActivity extends Activity {
 
 	private void setTrackNameIndikator() {
 		TextView text = (TextView) findViewById(R.id.text_currentTrack);
-		text.setText(this.currentAudiobook + " - " + this.currentPlaylist.get(this.currentTrackNumber).replace(this.appContext.getAudiobokkBaseDir(), " ").trim());
-	}
-
-	private void getPlaylistToPlay() {
-    	String playlist = this.appContext.getAudiobokkBaseDir() + File.separator + this.currentAudiobook + File.separator + this.currentAudiobook + ".m3u";
-		readPlaylist(playlist);
-	}
-
-	private void readPlaylist(String playlist) {
-		File playlistFile = new File(playlist);
-		if (playlist != null && playlistFile.exists()) {
-			try {
-				FileInputStream fis = new FileInputStream(playlistFile);
-				DataInputStream in = new DataInputStream(fis);
-				BufferedReader br = new BufferedReader(new InputStreamReader(in));
-				String line;
-				while ((line = br.readLine()) != null) {
-					if(!line.startsWith("#")){
-						this.currentPlaylist.add(line);
-					}
-				}
-				in.close();
-				br.close();
-				fis.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		text.setText(this.currentAudiobook + " - " + this.appContext.getCurrentPlaylist().get(this.currentTrackNumber).replace(this.appContext.getAudiobokkBaseDir(), " ").trim());
 	}
 
 	private void getAudiobookToPlay() {

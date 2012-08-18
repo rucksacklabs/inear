@@ -1,5 +1,15 @@
 package de.reneruck.inear;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.List;
+
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -12,6 +22,7 @@ public class AppContext extends Application {
 	private String currentAudiobook;
 	private String audiobookBaseDir = "";
 	private DatabaseManager databaseManager;
+	private List<String> currentPlaylist = new LinkedList<String>();
 	private boolean autoplay;
 
 	@Override
@@ -33,12 +44,46 @@ public class AppContext extends Application {
 		fileScanner.doInBackground();
 	}
 	
+	public List<String> getCurrentPlaylist() {
+		return this.currentPlaylist;
+	}
+
+	private void readPlaylist(String playlist) {
+		File playlistFile = new File(playlist);
+		if (playlist != null && playlistFile.exists()) {
+			try {
+				FileInputStream fis = new FileInputStream(playlistFile);
+				DataInputStream in = new DataInputStream(fis);
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				String line;
+				while ((line = br.readLine()) != null) {
+					if(!line.startsWith("#")){
+						this.currentPlaylist.add(line);
+					}
+				}
+				in.close();
+				br.close();
+				fis.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public String getCurrentAudiobook() {
 		return currentAudiobook;
 	}
 
 	public void setCurrentAudiobook(String currentAudiobook) {
 		this.currentAudiobook = currentAudiobook;
+		readPlaylistForCurrentAudiobook();
+	}
+
+	private void readPlaylistForCurrentAudiobook() {
+    	String playlist = this.audiobookBaseDir + File.separator + this.currentAudiobook + File.separator + this.currentAudiobook + ".m3u";
+		readPlaylist(playlist);
 	}
 
 	public String getAudiobokkBaseDir() {
