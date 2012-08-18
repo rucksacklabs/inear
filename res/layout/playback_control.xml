@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-
+        
     <SeekBar
         android:id="@+id/seekBar1"
         android:layout_width="match_parent"
@@ -10,7 +10,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginBottom="15dip"
-        android:layout_marginTop="15dip" />
+        android:layout_marginTop="40dip" />
 
     <ImageView
         android:id="@+id/button_play"
@@ -36,5 +36,23 @@
         android:layout_marginLeft="70dp"
         android:layout_toRightOf="@+id/button_play"
         android:src="@android:drawable/ic_media_next" />
+
+    <TextView
+        android:id="@+id/playback_max_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="20dip"
+        android:text="0:00" />
+
+    <TextView
+        android:id="@+id/playback_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="20dip"
+        android:text="0:00" />
 
 </RelativeLayout>

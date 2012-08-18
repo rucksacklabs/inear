@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+
+import javax.net.ssl.HandshakeCompletedListener;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -16,6 +19,8 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
+import android.os.Handler.Callback;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +46,7 @@ public class PlayActivity extends Activity {
 	private Bookmark currentBookmark;
 	private DatabaseManager databaseManager;
 	private SeekBar seekbar;
+	private Thread seekbarUpdateThread;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,19 +59,49 @@ public class PlayActivity extends Activity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         
         initializePlayControl();
-
+        
         getAudiobookToPlay();
         getPlaylistToPlay();
     }
 
+	private void initializeSeekbarUpdateThread() {
+		this.seekbarUpdateThread = new Thread(new Runnable() {
+			
+			private int lastPos = 0;
+
+			@Override
+			public void run() {
+				while(mediaPlayer != null && seekbar!= null)
+				{
+					int currentPos = mediaPlayer.getCurrentPosition();
+					if(currentPos != this.lastPos)
+					{
+						seekbar.setProgress(currentPos);
+						this.lastPos = currentPos;
+					}
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		this.seekbarUpdateThread.start();
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
 		getStoredBookmark();
 		applyBookmarkValues();
-		setTextIndikator();
+		setTrackNameIndikator();
 		initializeMediaplayer();
-		this.mediaPlayer.setOnPreparedListener(this.resumePreparedListener);
+		setNewDataSource();
+		initializeSeekbarUpdateThread();
+		
+		this.mediaPlayer.setOnPreparedListener(this.preparedListenerAfterResume);
 		this.mediaPlayer.prepareAsync();
 	}
 	
@@ -82,7 +118,6 @@ public class PlayActivity extends Activity {
     	this.mediaPlayer.setOnCompletionListener(this.trackFinishedListener);
     	this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
     	this.mediaPlayer.setScreenOnWhilePlaying(true);
-    	setNewDataSource();
 	}
 
     private void initializePlayControl() {
@@ -121,23 +156,55 @@ public class PlayActivity extends Activity {
 		}
 	}
 	
-	private OnPreparedListener resumePreparedListener = new OnPreparedListener() {
+	private OnPreparedListener preparedListenerAfterResume = new OnPreparedListener() {
 		
 		@Override
 		public void onPrepared(MediaPlayer mp) {
-			resumeFromBookmark();
+			setSeekbar();
+			setDurationIndicator();
+			setCurrentPlaytimeIndicator();
+			setSeekbarToBookmarkPosition();
+			setMediaplayerToBookmarkPosition();
+			startPlayOnAutoplay();
 		}
-
 
 	};
 	
-	private void resumeFromBookmark() {
-		setSeekbar();
+	private void setCurrentPlaytimeIndicator() {
+		setCurrentPlaytimeIndicator(this.mediaPlayer.getCurrentPosition());
+	}
+	
+	private void setCurrentPlaytimeIndicator(int progress) {
+		TextView currentTimeField = (TextView)findViewById(R.id.playback_current_time);
+		int seconds = (int) (progress / 1000) % 60 ;
+		int minutes = (int) ((progress / (1000*60)) % 60);	
+		String secoundsString = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
+		String durationText = minutes + ":" + secoundsString;
+		currentTimeField.setText(durationText);
+	}
+	
+	private void setDurationIndicator() {
+		int duration = this.mediaPlayer.getDuration();
+		TextView durationField = (TextView)findViewById(R.id.playback_max_time);
+		int seconds = (int) (duration / 1000) % 60 ;
+		int minutes = (int) ((duration / (1000*60)) % 60);		
+		String secoundsString = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
+		String durationText = minutes + ":" + secoundsString;
+		durationField.setText(durationText);
+	}
+	
+	private void setMediaplayerToBookmarkPosition() {
+		this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
+	}
+	
+	private void setSeekbarToBookmarkPosition() {
 		if(this.currentBookmark != null)
 		{
 			this.seekbar.setProgress(this.currentBookmark.getPlaybackPosition());
-			this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
 		}
+	}
+
+	private void startPlayOnAutoplay() {
 		if(this.appContext.isAutoplay()){
 			this.mediaPlayer.start();
 		}
@@ -148,6 +215,7 @@ public class PlayActivity extends Activity {
 		@Override
 		public void onPrepared(MediaPlayer mp) {
 			setSeekbar();
+			setDurationIndicator();
 			mediaPlayer.start();
 		}
 
@@ -171,6 +239,8 @@ public class PlayActivity extends Activity {
 
 		@Override
 		public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser) {
+			seekbar.setProgress(progress);
+			setCurrentPlaytimeIndicator(progress);
 		}
 
 		@Override
@@ -201,13 +271,13 @@ public class PlayActivity extends Activity {
 		if(this.currentTrackNumber < this.currentPlaylist.size())
 		{
 			setNewDataSource();
-			setTextIndikator();
+			setTrackNameIndikator();
 			this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
 			this.mediaPlayer.prepareAsync();
 		}
 	}
 
-	private void setTextIndikator() {
+	private void setTrackNameIndikator() {
 		TextView text = (TextView) findViewById(R.id.text_currentTrack);
 		text.setText(this.currentAudiobook + " - " + this.currentPlaylist.get(this.currentTrackNumber).replace(this.appContext.getAudiobokkBaseDir(), " ").trim());
 	}
@@ -332,5 +402,4 @@ public class PlayActivity extends Activity {
 		AsyncGetBookmark getBookmarkTask = new AsyncGetBookmark(this.databaseManager);
 		this.currentBookmark = getBookmarkTask.doInBackground(this.currentAudiobook);
 	}
-
 }
