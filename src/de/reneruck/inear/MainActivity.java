@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import de.reneruck.inear.file.FileScanner;
 import de.reneruck.inear.settings.SettingsActivity;
 
@@ -31,8 +34,6 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        
         this.appContext = (AppContext) getApplicationContext();
     }
 
@@ -45,11 +46,19 @@ public class MainActivity extends Activity {
     	if(this.audioBooksBaseDir != null && this.audioBooksBaseDir.exists())
     	{
     		getAllAudiobooks();
-    		initializeAndshowAudiobookList();
+    		initializeAndshowLayout();
+    	} else {
+    		showNoEntriesFoundScreen();
     	}
     }
 
-	private void initializeAndshowAudiobookList() {
+	private void showNoEntriesFoundScreen() {
+		setContentView(R.layout.activity_main_no_entries);
+		((TextView)findViewById(R.id.no_entries_path)).setText(this.appContext.getAudiobokkBaseDir());
+	}
+
+	private void initializeAndshowLayout() {
+		setContentView(R.layout.activity_main);
 		ListView audiobooksList = (ListView) findViewById(R.id.audiobooklist);
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, this.audioBookTitles);
 		audiobooksList.setAdapter(listAdapter);
@@ -80,7 +89,6 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
         case android.R.id.home:
-        	closeApp();
         	break;
         case R.id.menu_settings:
         	Intent i = new Intent(getApplicationContext(), SettingsActivity.class);
@@ -90,11 +98,6 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
-	private void closeApp() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	@Override
 	protected void onStop() {
 		super.onStop();
