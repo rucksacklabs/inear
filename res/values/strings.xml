@@ -1,18 +1,21 @@
 <resources>
 
     <string name="app_name">InEar</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="menu_settings">Settings</string>
     <string name="title_activity_main">InEar</string>
     <string name="title_activity_play">PlayActivity</string>
+
     <string name="no_way_back">Kein zurück mehr!!!</string>
     <string name="no_databasemanager">No DatabaseManager available to store Boomark</string>
+    <string name="no_audiobooks_found">No Audiobooks found in</string>
     <string name="last_played">Last Played</string>
+    
+    <string name="menu_settings">Settings</string>
     <string name="menu_playlist">Playlist</string>
     
     <string name="pref_base_dir">Audiobook Base Dir</string>
     <string name="pref_base_dir_summary">Define where the App is looking for Audiobooks</string>
     <string name="pref_base_dir_default">/sdcard/Audiobooks</string>
-    <string name="no_audiobooks_found">No Audiobooks found in</string>
-
+    
+    <string name="pref_autoplay">Automatic playback</string>
+    <string name="pref_autoplay_summary">Should the playback automatically start when opening an Audiobook</string>
 </resources>
