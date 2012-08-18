@@ -3,4 +3,10 @@
         android:title="@string/menu_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
+    
+    <item android:id="@+id/menu_playlist"
+        android:title="@string/menu_playlist"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom" />
+    
 </menu>
