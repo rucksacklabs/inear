@@ -7,4 +7,10 @@
         android:summary="@string/pref_base_dir_summary"
         android:title="@string/pref_base_dir" />
 
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="pref_autoplay"
+        android:summary="@string/pref_autoplay_summary"
+        android:title="@string/pref_autoplay" />
+
 </PreferenceScreen>

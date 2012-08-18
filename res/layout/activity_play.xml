@@ -11,7 +11,7 @@
         android:layout_alignParentTop="true"
         android:singleLine="true"
         style="@android:style/TextAppearance.DeviceDefault.Medium"
-        android:text="@string/hello_world"/>
+        android:text=""/>
 
     <SeekBar
         android:id="@+id/seekBar1"
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/seekBar1"
         android:layout_centerHorizontal="true"
-        android:src="@android:drawable/ic_media_pause" />
+        android:src="@android:drawable/ic_media_play" />
 
     <ImageView
         android:id="@+id/button_next"

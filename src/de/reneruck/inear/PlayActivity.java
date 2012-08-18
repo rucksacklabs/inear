@@ -89,8 +89,7 @@ public class PlayActivity extends Activity {
     	ImageView bottonNext = (ImageView) findViewById(R.id.button_next);
     	bottonNext.setOnClickListener(this.nextButtonClickListener);
     	
-    	ImageView bottonPlay = (ImageView) findViewById(R.id.button_play);
-    	bottonPlay.setOnClickListener(this.playButtonClickListener);
+    	initializePlayPauseButton();
     	
     	ImageView bottonPrev = (ImageView) findViewById(R.id.button_prev);
     	bottonPrev.setOnClickListener(this.prevButtonClickListener);
@@ -99,6 +98,14 @@ public class PlayActivity extends Activity {
 		this.seekbar.setOnSeekBarChangeListener(this.onSeekbarDragListener);
 	}
 	
+	private void initializePlayPauseButton() {
+		ImageView bottonPlay = (ImageView) findViewById(R.id.button_play);
+		bottonPlay.setOnClickListener(this.playButtonClickListener);
+		if(this.appContext.isAutoplay()){
+			((ImageView)bottonPlay).setImageResource(android.R.drawable.ic_media_pause);
+		}
+	}
+
 	private void setNewDataSource() {
 		try {
 			this.mediaPlayer.reset();
@@ -134,7 +141,9 @@ public class PlayActivity extends Activity {
 			setIndicator();
 			this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
 		}
-		this.mediaPlayer.start();
+		if(this.appContext.isAutoplay()){
+			this.mediaPlayer.start();
+		}
 	}
 	
 	private OnPreparedListener nextTrackPreparedListener = new OnPreparedListener() {

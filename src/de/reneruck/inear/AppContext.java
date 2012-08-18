@@ -12,12 +12,25 @@ public class AppContext extends Application {
 	private String currentAudiobook;
 	private String audiobookBaseDir = "";
 	private DatabaseManager databaseManager;
+	private boolean autoplay;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		this.databaseManager = new DatabaseManager(this);
+	}
+	
+	public void readSettings() {
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		this.audiobookBaseDir = sharedPref.getString("pref_base_dir", getString(R.string.pref_base_dir_default));
+		this.autoplay = sharedPref.getBoolean("pref_autoplay", true);
+		runFilescanner();
+	}
+	
+	private void runFilescanner() {
+		FileScanner fileScanner = new FileScanner(this);
+		fileScanner.doInBackground();
 	}
 	
 	public String getCurrentAudiobook() {
@@ -40,14 +53,12 @@ public class AppContext extends Application {
 		this.databaseManager = databaseManager;
 	}
 
-	public void readSettings() {
-		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-		this.audiobookBaseDir = sharedPref.getString("pref_base_dir", getString(R.string.pref_base_dir_default));
-        runFilescanner();
+
+	public boolean isAutoplay() {
+		return autoplay;
 	}
-	
-	private void runFilescanner() {
-		FileScanner fileScanner = new FileScanner(this);
-		fileScanner.doInBackground();
+
+	public void setAutoplay(boolean autoplay) {
+		this.autoplay = autoplay;
 	}
 }
