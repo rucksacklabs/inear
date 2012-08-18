@@ -1,50 +1,21 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" 
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/text_currentTrack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:singleLine="true"
         style="@android:style/TextAppearance.DeviceDefault.Medium"
-        android:text=""/>
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true" />
 
-    <SeekBar
-        android:id="@+id/seekBar1"
+    <fragment
+        android:name="de.reneruck.inear.PlaylistFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="25dip" />
+        android:layout_height="wrap_content" />
 
-    <ImageView
-        android:id="@+id/button_play"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/seekBar1"
-        android:layout_centerHorizontal="true"
-        android:src="@android:drawable/ic_media_play" />
+	<include layout="@layout/playback_control"/>
 
-    <ImageView
-        android:id="@+id/button_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/button_play"
-        android:layout_marginLeft="50dp"
-        android:layout_toRightOf="@+id/button_play"
-        android:src="@android:drawable/ic_media_next" />
-
-    <ImageView
-        android:id="@+id/button_prev"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/button_play"
-        android:layout_marginRight="50dp"
-        android:layout_toLeftOf="@+id/button_play"
-        android:src="@android:drawable/ic_media_previous" />
-
-</RelativeLayout>
+</LinearLayout>
