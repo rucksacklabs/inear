@@ -292,7 +292,7 @@ public class PlayActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			mediaPlayer.stop();
-			setNextTrack();
+			setPreveriousTrack();
 		}
 	};
 	
