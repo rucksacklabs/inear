@@ -1,0 +1,19 @@
+<resources>
+
+    <string name="app_name">InEar</string>
+
+    <string name="title_activity_main">InEar</string>
+    <string name="title_activity_play">PlayActivity</string>
+    <string name="no_way_back">Kein zurück mehr!!!</string>
+    <string name="no_databasemanager">Keine Datenbank verfügbar, kann Lesezeichen nicht speichern</string>
+    <string name="last_played">Zuletzt gespielt</string>
+    
+    <string name="menu_settings">Einstellungen</string>
+    <string name="menu_playlist">Playlist</string>
+    
+    <string name="pref_base_dir">Hörbuch Verzeichnis</string>
+    <string name="pref_base_dir_summary">Das Verzeichnis in der die App nach Hörbüchern suchen soll</string>
+    <string name="pref_base_dir_default">/sdcard/Audiobooks</string>
+    <string name="no_audiobooks_found">Es wurden keine Hörbücher gefunden in</string>
+
+</resources>
