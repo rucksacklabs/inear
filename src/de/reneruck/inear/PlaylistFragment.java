@@ -25,7 +25,7 @@ public class PlaylistFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View inflated = inflater.inflate(R.layout.fragment_playlist, container);
 		ListView playlistView = (ListView) inflated.findViewById(R.id.playlist);
-		this.currentPlaylist = this.appContext.getCurrentPlaylist();
+		this.currentPlaylist = this.appContext.getCurrentAudiobookBean().getPlaylist();
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this.appContext, android.R.layout.simple_list_item_1, currentPlaylist);
 		playlistView.setAdapter(listAdapter);
 		return inflated;

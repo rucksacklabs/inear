@@ -13,17 +13,18 @@ import java.util.List;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import de.reneruck.inear.db.AsyncGetBookmark;
 import de.reneruck.inear.db.DatabaseManager;
 import de.reneruck.inear.file.FileScanner;
 
 
 public class AppContext extends Application {
 
-	private String currentAudiobook;
 	private String audiobookBaseDir = "";
-	private DatabaseManager databaseManager;
-	private List<String> currentPlaylist = new ArrayList<String>();
 	private boolean autoplay;
+	
+	private DatabaseManager databaseManager;
+	private CurrentAudiobook currentAudiobookBean;
 
 	@Override
 	public void onCreate() {
@@ -44,13 +45,10 @@ public class AppContext extends Application {
 		fileScanner.doInBackground();
 	}
 	
-	public List<String> getCurrentPlaylist() {
-		return this.currentPlaylist;
-	}
-
-	private void readPlaylist(String playlist) {
-		File playlistFile = new File(playlist);
-		if (playlist != null && playlistFile.exists()) {
+	private void readPlaylist(String playlistPath) {
+		File playlistFile = new File(playlistPath);
+		List<String> playlist = new ArrayList<String>();
+		if (playlistPath != null && playlistFile.exists()) {
 			try {
 				FileInputStream fis = new FileInputStream(playlistFile);
 				DataInputStream in = new DataInputStream(fis);
@@ -58,7 +56,7 @@ public class AppContext extends Application {
 				String line;
 				while ((line = br.readLine()) != null) {
 					if(!line.startsWith("#")){
-						this.currentPlaylist.add(line);
+						playlist.add(line);
 					}
 				}
 				in.close();
@@ -70,23 +68,34 @@ public class AppContext extends Application {
 				e.printStackTrace();
 			}
 		}
+		this.currentAudiobookBean.setPlaylist(playlist);
 	}
 	
-	public String getCurrentAudiobook() {
-		return currentAudiobook;
+	public void setCurrentAudiobook(String currentAudiobook) {
+		readCurrentAduiobookValues(currentAudiobook);
 	}
 
-	public void setCurrentAudiobook(String currentAudiobook) {
-		this.currentAudiobook = currentAudiobook;
+	private void readCurrentAduiobookValues(String currentAudiobook) {
+		this.currentAudiobookBean = new CurrentAudiobook(this, currentAudiobook);
 		readPlaylistForCurrentAudiobook();
+		getStoredBookmark();
 	}
 
 	private void readPlaylistForCurrentAudiobook() {
-    	String playlist = this.audiobookBaseDir + File.separator + this.currentAudiobook + File.separator + this.currentAudiobook + ".m3u";
-    	this.currentPlaylist.clear();
+    	String playlist = this.audiobookBaseDir + File.separator + this.currentAudiobookBean.getName() + File.separator + this.currentAudiobookBean.getName() + ".m3u";
 		readPlaylist(playlist);
 	}
 
+	private void getStoredBookmark() {
+		AsyncGetBookmark getBookmarkTask = new AsyncGetBookmark(this.databaseManager);
+		Bookmark bookmark = getBookmarkTask.doInBackground(this.currentAudiobookBean.getName());
+		if(bookmark != null)
+		{
+			this.currentAudiobookBean.setBookmark(bookmark);
+			this.currentAudiobookBean.setCurrentTrack(bookmark.getTrackNumber());
+		}
+	}
+	
 	public String getAudiobokkBaseDir() {
 		return this.audiobookBaseDir;
 	}
@@ -106,5 +115,13 @@ public class AppContext extends Application {
 
 	public void setAutoplay(boolean autoplay) {
 		this.autoplay = autoplay;
+	}
+
+	public CurrentAudiobook getCurrentAudiobookBean() {
+		return currentAudiobookBean;
+	}
+
+	public void setCurrentAudiobookBean(CurrentAudiobook currentAudiobookBean) {
+		this.currentAudiobookBean = currentAudiobookBean;
 	}
 }

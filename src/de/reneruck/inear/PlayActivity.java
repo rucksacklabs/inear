@@ -26,13 +26,11 @@ public class PlayActivity extends Activity {
 
     private static final String TAG = "PlayActivity";
 	private AppContext appContext;
-	private String currentAudiobook;
 	private MediaPlayer mediaPlayer;
-	private int currentTrackNumber = 0;
-	private Bookmark currentBookmark;
 	private DatabaseManager databaseManager;
 	private SeekBar seekbar;
 	private Thread seekbarUpdateThread;
+	private CurrentAudiobook currentAudiobookBean;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,8 +43,6 @@ public class PlayActivity extends Activity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         
         initializePlayControl();
-        
-        getAudiobookToPlay();
     }
 
 	private void initializeSeekbarUpdateThread() {
@@ -79,8 +75,8 @@ public class PlayActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		getStoredBookmark();
-		applyBookmarkValues();
+		getCurrentAudiobookBean();
+		
 		setCurrentTrackNameIndikator();
 		initializeMediaplayer();
 		setNewDataSource();
@@ -90,14 +86,10 @@ public class PlayActivity extends Activity {
 		this.mediaPlayer.prepareAsync();
 	}
 	
-	private void applyBookmarkValues() {
-		if(this.currentBookmark != null)
-		{
-			this.currentTrackNumber = this.currentBookmark.getTrackNumber();
-		}
+	private void getCurrentAudiobookBean() {
+		this.currentAudiobookBean = this.appContext.getCurrentAudiobookBean();
 	}
 
-	
 	private void initializeMediaplayer() {
     	this.mediaPlayer = new MediaPlayer();
     	this.mediaPlayer.setOnCompletionListener(this.trackFinishedListener);
@@ -129,7 +121,7 @@ public class PlayActivity extends Activity {
 	private void setNewDataSource() {
 		try {
 			this.mediaPlayer.reset();
-			this.mediaPlayer.setDataSource(this.appContext.getCurrentPlaylist().get(this.currentTrackNumber));
+			this.mediaPlayer.setDataSource(this.currentAudiobookBean.getPlaylist().get(this.currentAudiobookBean.getCurrentTrack()));
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {
@@ -179,16 +171,16 @@ public class PlayActivity extends Activity {
 	}
 	
 	private void setMediaplayerToBookmarkPosition() {
-		if(this.currentBookmark != null)
+		if(this.currentAudiobookBean.getBookmark() != null)
 		{
-			this.mediaPlayer.seekTo(this.currentBookmark.getPlaybackPosition());
+			this.mediaPlayer.seekTo(this.currentAudiobookBean.getBookmark().getPlaybackPosition());
 		}
 	}
 	
 	private void setSeekbarToBookmarkPosition() {
-		if(this.currentBookmark != null)
+		if(this.currentAudiobookBean.getBookmark() != null)
 		{
-			this.seekbar.setProgress(this.currentBookmark.getPlaybackPosition());
+			this.seekbar.setProgress(this.currentAudiobookBean.getBookmark().getPlaybackPosition());
 		}
 	}
 
@@ -249,22 +241,17 @@ public class PlayActivity extends Activity {
 
 	
 	private void setPreveriousTrack() {
-		this.currentTrackNumber--;
-		if(this.currentTrackNumber > 0)
+		
+		if(this.currentAudiobookBean.setPreviousTrack())
 		{
 			switchTrack();
-		} else {
-			this.currentTrackNumber = 0;
 		}
 	}
 	
 	private void setNextTrack() {
-		this.currentTrackNumber++;
-		if(this.currentTrackNumber < this.appContext.getCurrentPlaylist().size())
+		if(this.currentAudiobookBean.setNextTrack())
 		{
 			switchTrack();
-		} else {
-			this.currentTrackNumber = this.appContext.getCurrentPlaylist().size();
 		}
 	}
 
@@ -277,11 +264,7 @@ public class PlayActivity extends Activity {
 
 	private void setCurrentTrackNameIndikator() {
 		TextView text = (TextView) findViewById(R.id.text_currentTrack);
-		text.setText(this.currentAudiobook + " - " + this.appContext.getCurrentPlaylist().get(this.currentTrackNumber).replace(this.appContext.getAudiobokkBaseDir(), " ").trim());
-	}
-
-	private void getAudiobookToPlay() {
-		this.currentAudiobook = this.appContext.getCurrentAudiobook();
+		text.setText(this.currentAudiobookBean.getCurrentTrackName());
 	}
 
 	@Override
@@ -345,12 +328,12 @@ public class PlayActivity extends Activity {
     }
 
 	private void createOrUpdateBookmark() {
-		if(this.currentBookmark != null)
+		if(this.currentAudiobookBean.getBookmark() != null)
 		{
-			this.currentBookmark.setTrackNumber(this.currentTrackNumber);
-			this.currentBookmark.setPlaybackPosition(this.mediaPlayer.getCurrentPosition());
+			this.currentAudiobookBean.getBookmark().setTrackNumber(this.currentAudiobookBean.getCurrentTrack());
+			this.currentAudiobookBean.getBookmark().setPlaybackPosition(this.mediaPlayer.getCurrentPosition());
 		} else {
-			this.currentBookmark = new Bookmark(this.currentAudiobook, this.currentTrackNumber, this.mediaPlayer.getCurrentPosition());
+			this.currentAudiobookBean.setBookmark(new Bookmark(this.currentAudiobookBean.getName(), this.currentAudiobookBean.getCurrentTrack(), this.mediaPlayer.getCurrentPosition()));
 		}
 		storeBookmark();
 	}
@@ -359,16 +342,11 @@ public class PlayActivity extends Activity {
 		if(this.databaseManager != null)
 		{
 			AsyncStoreBookmark storeBookmarkTask = new AsyncStoreBookmark(this.databaseManager);
-			storeBookmarkTask.doInBackground(this.currentBookmark);
+			storeBookmarkTask.doInBackground(this.currentAudiobookBean.getBookmark());
 		} else {
 			String string = getString(R.string.no_databasemanager);
 			Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
 			Log.e(TAG, string);
 		}
-	}
-	
-	private void getStoredBookmark() {
-		AsyncGetBookmark getBookmarkTask = new AsyncGetBookmark(this.databaseManager);
-		this.currentBookmark = getBookmarkTask.doInBackground(this.currentAudiobook);
 	}
 }
