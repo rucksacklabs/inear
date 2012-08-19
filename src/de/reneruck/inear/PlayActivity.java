@@ -263,6 +263,8 @@ public class PlayActivity extends Activity {
 		if(this.currentTrackNumber < this.appContext.getCurrentPlaylist().size())
 		{
 			switchTrack();
+		} else {
+			this.currentTrackNumber = this.appContext.getCurrentPlaylist().size();
 		}
 	}
 
