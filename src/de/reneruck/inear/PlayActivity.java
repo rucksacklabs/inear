@@ -1,5 +1,7 @@
 package de.reneruck.inear;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 import android.app.ActionBar;
@@ -18,7 +20,6 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
-import de.reneruck.inear.db.AsyncGetBookmark;
 import de.reneruck.inear.db.AsyncStoreBookmark;
 import de.reneruck.inear.db.DatabaseManager;
 
@@ -76,6 +77,7 @@ public class PlayActivity extends Activity {
 		super.onResume();
 		
 		getCurrentAudiobookBean();
+		registerForAudiobookBeanChanges();
 		
 		setCurrentTrackNameIndikator();
 		initializeMediaplayer();
@@ -86,6 +88,10 @@ public class PlayActivity extends Activity {
 		this.mediaPlayer.prepareAsync();
 	}
 	
+	private void registerForAudiobookBeanChanges() {
+		this.currentAudiobookBean.addPropertyChangeListener(this.currentAudiobookBeanChangeListener);
+	}
+
 	private void getCurrentAudiobookBean() {
 		this.currentAudiobookBean = this.appContext.getCurrentAudiobookBean();
 	}
@@ -132,6 +138,17 @@ public class PlayActivity extends Activity {
 			e.printStackTrace();
 		}
 	}
+	
+	private PropertyChangeListener currentAudiobookBeanChangeListener = new PropertyChangeListener() {
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent event) {
+			if("track".equals(event.getPropertyName()) && mediaPlayer != null)
+			{
+				switchTrack();
+			}
+		}
+	};
 	
 	private OnPreparedListener preparedListenerAfterResume = new OnPreparedListener() {
 		
@@ -241,7 +258,6 @@ public class PlayActivity extends Activity {
 
 	
 	private void setPreveriousTrack() {
-		
 		if(this.currentAudiobookBean.setPreviousTrack())
 		{
 			switchTrack();
