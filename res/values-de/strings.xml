@@ -15,7 +15,13 @@
     <string name="pref_base_dir">Hörbuch Verzeichnis</string>
     <string name="pref_base_dir_summary">Das Verzeichnis in der die App nach Hörbüchern suchen soll</string>
     <string name="pref_base_dir_default">/sdcard/Audiobooks</string>
-
+    
     <string name="pref_autoplay">Automatisches Abspielen</string>
     <string name="pref_autoplay_summary">Automatisches Abspielen beim öffnen eines Hörbuchs</string>
+    
+    <string name="pref_exclude_audiobook_files">Hörbuch Dateien vom Medienscan ausnehmen</string>
+
+	<string name="content_desc_previous_track">vorheriger Titel</string>
+    <string name="content_desc_play_button">play button</string>
+    <string name="content_desc_next_track">nächster Titel</string>
 </resources>

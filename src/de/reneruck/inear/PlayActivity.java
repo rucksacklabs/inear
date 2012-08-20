@@ -119,7 +119,7 @@ public class PlayActivity extends Activity {
 	private void initializePlayPauseButton() {
 		ImageView bottonPlay = (ImageView) findViewById(R.id.button_play);
 		bottonPlay.setOnClickListener(this.playButtonClickListener);
-		if(this.appContext.isAutoplay()){
+		if(this.appContext.getSettings().isAutoplay()){
 			((ImageView)bottonPlay).setImageResource(android.R.drawable.ic_media_pause);
 		}
 	}
@@ -202,7 +202,7 @@ public class PlayActivity extends Activity {
 	}
 
 	private void startPlayOnAutoplay() {
-		if(this.appContext.isAutoplay()){
+		if(this.appContext.getSettings().isAutoplay()){
 			this.mediaPlayer.start();
 		}
 	}

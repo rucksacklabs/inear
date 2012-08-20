@@ -12,5 +12,10 @@
         android:key="pref_autoplay"
         android:summary="@string/pref_autoplay_summary"
         android:title="@string/pref_autoplay" />
+    
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="pref_create_nomedia"
+        android:title="@string/pref_exclude_audiobook_files" />
 
 </PreferenceScreen>

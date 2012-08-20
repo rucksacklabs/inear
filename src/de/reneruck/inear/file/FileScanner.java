@@ -45,11 +45,11 @@ public class FileScanner extends AsyncTask<Void, Void, Void> {
 		File[] listFiles = audiobookDir.listFiles(dirFilter);
 		List<String> mediaFiles = new LinkedList<String>();
 		mediaFiles.addAll(getMediafiles(audiobookDir));
-		createNoMediaFile(audiobookDir);
+		if(this.appContext.getSettings().isCreateNoMediaFile())createNoMediaFile(audiobookDir);
 		
 		for (File dir : listFiles) {
 			mediaFiles.addAll(getMediafiles(dir));
-			createNoMediaFile(dir);
+			if(this.appContext.getSettings().isCreateNoMediaFile())createNoMediaFile(dir);
 		}
 		createAndWritePlaylist(audiobookDir, mediaFiles);
 	}

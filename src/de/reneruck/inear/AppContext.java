@@ -21,10 +21,10 @@ import de.reneruck.inear.file.FileScanner;
 public class AppContext extends Application {
 
 	private String audiobookBaseDir = "";
-	private boolean autoplay;
-	
+
 	private DatabaseManager databaseManager;
 	private CurrentAudiobook currentAudiobookBean;
+	private Settings settings;
 
 	@Override
 	public void onCreate() {
@@ -36,7 +36,7 @@ public class AppContext extends Application {
 	public void readSettings() {
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		this.audiobookBaseDir = sharedPref.getString("pref_base_dir", getString(R.string.pref_base_dir_default));
-		this.autoplay = sharedPref.getBoolean("pref_autoplay", true);
+		this.settings = new Settings(sharedPref);
 		runFilescanner();
 	}
 	
@@ -108,20 +108,19 @@ public class AppContext extends Application {
 		this.databaseManager = databaseManager;
 	}
 
-
-	public boolean isAutoplay() {
-		return autoplay;
-	}
-
-	public void setAutoplay(boolean autoplay) {
-		this.autoplay = autoplay;
-	}
-
 	public CurrentAudiobook getCurrentAudiobookBean() {
 		return currentAudiobookBean;
 	}
 
 	public void setCurrentAudiobookBean(CurrentAudiobook currentAudiobookBean) {
 		this.currentAudiobookBean = currentAudiobookBean;
+	}
+
+	public Settings getSettings() {
+		return settings;
+	}
+
+	public void setSettings(Settings settings) {
+		this.settings = settings;
 	}
 }
