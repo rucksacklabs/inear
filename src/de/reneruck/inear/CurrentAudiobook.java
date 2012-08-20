@@ -53,25 +53,19 @@ public class CurrentAudiobook {
 		this.bookmark = bookmark;
 	}
 
-	public boolean setPreviousTrack() {
+	public void setPreviousTrack() {
 		if (this.track - 1 >= 0) {
 			int oldtrack = this.track;
 			this.track--;
 			this.changes.firePropertyChange("track", oldtrack, this.track);
-			return true;
-		} else {
-			return false;
 		}
 	}
 
-	public boolean setNextTrack() {
+	public void setNextTrack() {
 		if (this.track + 1 <= this.playlist.size()) {
 			int oldtrack = this.track;
 			this.track++;
 			this.changes.firePropertyChange("track", oldtrack, this.track);
-			return true;
-		} else {
-			return false;
 		}
 	}
 

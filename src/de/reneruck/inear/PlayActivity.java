@@ -258,17 +258,11 @@ public class PlayActivity extends Activity {
 
 	
 	private void setPreveriousTrack() {
-		if(this.currentAudiobookBean.setPreviousTrack())
-		{
-			switchTrack();
-		}
+		this.currentAudiobookBean.setPreviousTrack();
 	}
 	
 	private void setNextTrack() {
-		if(this.currentAudiobookBean.setNextTrack())
-		{
-			switchTrack();
-		}
+		this.currentAudiobookBean.setNextTrack();
 	}
 
 	private void switchTrack() {
