@@ -45,6 +45,7 @@ public class FileScanner extends AsyncTask<Void, Void, Void> {
 		File[] listFiles = audiobookDir.listFiles(dirFilter);
 		List<String> mediaFiles = new LinkedList<String>();
 		mediaFiles.addAll(getMediafiles(audiobookDir));
+		createNoMediaFile(audiobookDir);
 		
 		for (File dir : listFiles) {
 			mediaFiles.addAll(getMediafiles(dir));
@@ -55,7 +56,7 @@ public class FileScanner extends AsyncTask<Void, Void, Void> {
 
 	private void createNoMediaFile(File dir) {
 		File noMediaFile = new File(dir.getAbsolutePath() + File.separator + ".nomedia");
-		if(noMediaFile == null || noMediaFile.exists()){
+		if(noMediaFile == null | !noMediaFile.exists()){
 			try {
 				noMediaFile.createNewFile();
 			} catch (IOException e) {
