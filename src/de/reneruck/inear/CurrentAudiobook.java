@@ -62,7 +62,7 @@ public class CurrentAudiobook {
 	}
 
 	public void setNextTrack() {
-		if (this.track + 1 <= this.playlist.size()) {
+		if (this.track + 1 <= this.playlist.size()-1) {
 			int oldtrack = this.track;
 			this.track++;
 			this.changes.firePropertyChange("track", oldtrack, this.track);

@@ -251,7 +251,7 @@ public class PlayActivity extends Activity {
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
 			mediaPlayer.seekTo(seekBar.getProgress());
-			if(this.wasPlaying) mediaPlayer.start();
+			if(this.wasPlaying) startPlayback();
 		}
 		
 	};
@@ -300,7 +300,6 @@ public class PlayActivity extends Activity {
 		
 		@Override
 		public void onClick(View v) {
-			mediaPlayer.stop();
 			setNextTrack();
 		}
 	};
@@ -331,7 +330,6 @@ public class PlayActivity extends Activity {
 		
 		@Override
 		public void onClick(View v) {
-			mediaPlayer.stop();
 			setPreveriousTrack();
 		}
 	};
