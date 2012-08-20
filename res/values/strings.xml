@@ -7,7 +7,9 @@
     <string name="no_way_back">Kein zurück mehr!!!</string>
     <string name="no_databasemanager">No DatabaseManager available to store Boomark</string>
     <string name="no_audiobooks_found">No Audiobooks found in</string>
+
     <string name="last_played">Last Played</string>
+    <string name="current_track_placeholder">current track</string>
     
     <string name="menu_settings">Settings</string>
     <string name="menu_playlist">Playlist</string>

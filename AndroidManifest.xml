@@ -7,6 +7,7 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="15" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".AppContext"
@@ -27,7 +28,4 @@
         </activity>
         <activity android:name=".settings.SettingsActivity"></activity>
     </application>
-
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    
 </manifest>
