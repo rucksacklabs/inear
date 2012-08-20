@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" 
-    android:layout_marginBottom="20dip">
+    android:layout_marginBottom="10dip">
         
     <SeekBar
         android:id="@+id/seekBar1"
@@ -10,7 +10,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="15dip"
         android:layout_marginTop="40dip" />
 
     <TextView
@@ -45,6 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:layout_marginRight="60dip"
+            android:padding="15dip"
             android:src="@android:drawable/ic_media_previous" />
 
         <ImageView
@@ -53,6 +53,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:padding="15dip"
             android:src="@android:drawable/ic_media_play" />
 
         <ImageView
@@ -62,6 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:layout_marginLeft="60dip"
+            android:padding="15dip"
             android:src="@android:drawable/ic_media_next" />
     </LinearLayout>
 
