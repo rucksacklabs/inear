@@ -40,8 +40,9 @@ public class CurrentAudiobook {
 	}
 
 	public void setCurrentTrack(int track) {
+		int oldTrack = this.track;
 		this.track = track;
-		this.changes.firePropertyChange("track", this.track, track);
+		this.changes.firePropertyChange("track", oldTrack, track);
 	}
 
 	public Bookmark getBookmark() {
@@ -54,8 +55,9 @@ public class CurrentAudiobook {
 
 	public boolean setPreviousTrack() {
 		if (this.track - 1 >= 0) {
+			int oldtrack = this.track;
 			this.track--;
-			this.changes.firePropertyChange("track", null, this.track);
+			this.changes.firePropertyChange("track", oldtrack, this.track);
 			return true;
 		} else {
 			return false;
@@ -64,8 +66,9 @@ public class CurrentAudiobook {
 
 	public boolean setNextTrack() {
 		if (this.track + 1 <= this.playlist.size()) {
+			int oldtrack = this.track;
 			this.track++;
-			this.changes.firePropertyChange("track", null, this.track);
+			this.changes.firePropertyChange("track", oldtrack, this.track);
 			return true;
 		} else {
 			return false;

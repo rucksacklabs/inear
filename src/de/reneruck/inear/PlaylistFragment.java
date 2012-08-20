@@ -18,6 +18,7 @@ public class PlaylistFragment extends Fragment implements PropertyChangeListener
 	private AppContext appContext;
 	private List<String> currentPlaylist;
 	private ListView playlistView;
+	private PlaylistAdapter listAdapter;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -30,12 +31,17 @@ public class PlaylistFragment extends Fragment implements PropertyChangeListener
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View inflated = inflater.inflate(R.layout.fragment_playlist, container);
 		this.playlistView = (ListView) inflated.findViewById(R.id.playlist);
-		this.currentPlaylist = this.appContext.getCurrentAudiobookBean().getPlaylist();
-		PlaylistAdapter listAdapter = new PlaylistAdapter(this.appContext, android.R.layout.simple_list_item_1, currentPlaylist);
-		this.playlistView.setAdapter(listAdapter);
-		this.playlistView.setOnItemClickListener(this.onPlaylistItemListener);
+		setupListView();
 		return inflated;
 	}
+
+	private void setupListView() {
+		this.currentPlaylist = this.appContext.getCurrentAudiobookBean().getPlaylist();
+		this.listAdapter = new PlaylistAdapter(this.appContext, android.R.layout.simple_list_item_1, currentPlaylist);
+		this.playlistView.setAdapter(this.listAdapter);
+		this.playlistView.setOnItemClickListener(this.onPlaylistItemListener);
+	}
+	
 	private OnItemClickListener onPlaylistItemListener = new OnItemClickListener() {
 
 		@Override
@@ -50,7 +56,7 @@ public class PlaylistFragment extends Fragment implements PropertyChangeListener
 		{
 			if(this.playlistView != null)
 			{
-				this.playlistView.invalidate();
+				this.listAdapter.notifyDataSetChanged();
 			}
 		}
 	}
