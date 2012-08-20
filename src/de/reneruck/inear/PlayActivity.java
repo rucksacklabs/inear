@@ -213,7 +213,7 @@ public class PlayActivity extends Activity {
 		public void onPrepared(MediaPlayer mp) {
 			setSeekbar();
 			setDurationIndicator();
-			mediaPlayer.start();
+			startPlayback();
 		}
 
 	};
@@ -310,14 +310,22 @@ public class PlayActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			if(mediaPlayer.isPlaying()){
-				mediaPlayer.pause();
-				((ImageView)v).setImageResource(android.R.drawable.ic_media_play);
+				pausePlayback();
 			} else {
-				mediaPlayer.start();
-				((ImageView)v).setImageResource(android.R.drawable.ic_media_pause);
+				startPlayback();
 			}
 		}
 	};
+	
+	private void startPlayback() {
+		mediaPlayer.start();
+		((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_pause);
+	}
+	
+	private void pausePlayback() {
+		mediaPlayer.pause();
+		((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_play);
+	}
 	
 	private OnClickListener prevButtonClickListener = new OnClickListener() {
 		
