@@ -7,6 +7,7 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="15" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".AppContext"
@@ -26,8 +27,6 @@
             android:label="@string/title_activity_play" >
         </activity>
         <activity android:name=".settings.SettingsActivity"></activity>
+        <service android:name=".mediaservice.PlaybackService"></service>
     </application>
-
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    
 </manifest>

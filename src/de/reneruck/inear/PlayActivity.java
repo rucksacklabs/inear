@@ -4,12 +4,18 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
+
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,16 +28,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.reneruck.inear.db.AsyncStoreBookmark;
 import de.reneruck.inear.db.DatabaseManager;
+import de.reneruck.inear.mediaservice.PlaybackService;
+import de.reneruck.inear.mediaservice.PlaybackServiceControl;
+import de.reneruck.inear.mediaservice.PlaybackServiceControlImpl;
 
 public class PlayActivity extends Activity {
 
     private static final String TAG = "PlayActivity";
 	private AppContext appContext;
-	private MediaPlayer mediaPlayer;
 	private DatabaseManager databaseManager;
 	private SeekBar seekbar;
 	private Thread seekbarUpdateThread;
 	private CurrentAudiobook currentAudiobookBean;
+	private Intent playbackServiceIntent;
+	private PlaybackServiceControl playbackServiceBinder;
+	private boolean isBound;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,18 +60,11 @@ public class PlayActivity extends Activity {
 	private void initializeSeekbarUpdateThread() {
 		this.seekbarUpdateThread = new Thread(new Runnable() {
 			
-			private int lastPos = 0;
-
 			@Override
 			public void run() {
-				while(mediaPlayer != null && seekbar!= null)
+				while(isBound && playbackServiceBinder.isPlaying())
 				{
-					int currentPos = mediaPlayer.getCurrentPosition();
-					if(currentPos != this.lastPos)
-					{
-						seekbar.setProgress(currentPos);
-						this.lastPos = currentPos;
-					}
+						seekbar.setProgress(playbackServiceBinder.getCurrentPlaybackPosition());
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
@@ -76,38 +80,39 @@ public class PlayActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
-		getCurrentAudiobookBean();
-		registerForAudiobookBeanChanges();
-		
-		setCurrentTrackNameIndikator();
-		initializeMediaplayer();
-		setNewDataSource();
-		initializeSeekbarUpdateThread();
-		
-		this.mediaPlayer.setOnPreparedListener(this.preparedListenerAfterResume);
-		this.mediaPlayer.prepareAsync();
+//		initializeSeekbarUpdateThread();
+		bindToPlaybackService();
 	}
 	
-	private void registerForAudiobookBeanChanges() {
-		this.currentAudiobookBean.addPropertyChangeListener(this.currentAudiobookBeanChangeListener);
-	}
+	private ServiceConnection serviceConnection = new ServiceConnection() {
 
-	private void getCurrentAudiobookBean() {
-		this.currentAudiobookBean = this.appContext.getCurrentAudiobookBean();
-	}
-
-	private void initializeMediaplayer() {
-    	this.mediaPlayer = new MediaPlayer();
-    	this.mediaPlayer.setOnCompletionListener(this.trackFinishedListener);
-    	this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
-    	this.mediaPlayer.setScreenOnWhilePlaying(true);
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			isBound = false;
+			playbackServiceBinder = null;
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			if(service instanceof PlaybackServiceControl)
+			{
+				playbackServiceBinder = (PlaybackServiceControl)service;
+				isBound = true;
+				playbackServiceBinder.loadCurrentAudiobook();
+			}
+		}
+	};
+	
+	private void bindToPlaybackService() {
+		boolean bindService = bindService(new Intent(getApplicationContext(), PlaybackService.class), this.serviceConnection, Context.BIND_AUTO_CREATE);
 	}
 
     private void initializePlayControl() {
     	ImageView bottonNext = (ImageView) findViewById(R.id.button_next);
     	bottonNext.setOnClickListener(this.nextButtonClickListener);
     	
-    	initializePlayPauseButton();
+    	ImageView bottonPlay = (ImageView) findViewById(R.id.button_play);
+    	bottonPlay.setOnClickListener(this.playButtonClickListener);
     	
     	ImageView bottonPrev = (ImageView) findViewById(R.id.button_prev);
     	bottonPrev.setOnClickListener(this.prevButtonClickListener);
@@ -116,57 +121,6 @@ public class PlayActivity extends Activity {
 		this.seekbar.setOnSeekBarChangeListener(this.onSeekbarDragListener);
 	}
 	
-	private void initializePlayPauseButton() {
-		ImageView bottonPlay = (ImageView) findViewById(R.id.button_play);
-		bottonPlay.setOnClickListener(this.playButtonClickListener);
-		if(this.appContext.getSettings().isAutoplay()){
-			((ImageView)bottonPlay).setImageResource(android.R.drawable.ic_media_pause);
-		}
-	}
-
-	private void setNewDataSource() {
-		try {
-			this.mediaPlayer.reset();
-			this.mediaPlayer.setDataSource(this.currentAudiobookBean.getPlaylist().get(this.currentAudiobookBean.getCurrentTrack()));
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private PropertyChangeListener currentAudiobookBeanChangeListener = new PropertyChangeListener() {
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent event) {
-			if("track".equals(event.getPropertyName()) && mediaPlayer != null)
-			{
-				switchTrack();
-			}
-		}
-	};
-	
-	private OnPreparedListener preparedListenerAfterResume = new OnPreparedListener() {
-		
-		@Override
-		public void onPrepared(MediaPlayer mp) {
-			setSeekbar();
-			setDurationIndicator();
-			setCurrentPlaytimeIndicator();
-			setSeekbarToBookmarkPosition();
-			setMediaplayerToBookmarkPosition();
-			startPlayOnAutoplay();
-		}
-
-	};
-	
-	private void setCurrentPlaytimeIndicator() {
-		setCurrentPlaytimeIndicator(this.mediaPlayer.getCurrentPosition());
-	}
 	
 	private void setCurrentPlaytimeIndicator(int progress) {
 		TextView currentTimeField = (TextView)findViewById(R.id.playback_current_time);
@@ -178,59 +132,17 @@ public class PlayActivity extends Activity {
 	}
 	
 	private void setDurationIndicator() {
-		int duration = this.mediaPlayer.getDuration();
-		TextView durationField = (TextView)findViewById(R.id.playback_max_time);
-		int seconds = (int) (duration / 1000) % 60 ;
-		int minutes = (int) ((duration / (1000*60)) % 60);		
-		String secoundsString = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
-		String durationText = minutes + ":" + secoundsString;
-		durationField.setText(durationText);
-	}
-	
-	private void setMediaplayerToBookmarkPosition() {
-		if(this.currentAudiobookBean.getBookmark() != null)
+		if(isBound)
 		{
-			this.mediaPlayer.seekTo(this.currentAudiobookBean.getBookmark().getPlaybackPosition());
+			int duration = this.playbackServiceBinder.getDuration();
+			TextView durationField = (TextView)findViewById(R.id.playback_max_time);
+			int seconds = (int) (duration / 1000) % 60 ;
+			int minutes = (int) ((duration / (1000*60)) % 60);		
+			String secoundsString = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
+			String durationText = minutes + ":" + secoundsString;
+			durationField.setText(durationText);
 		}
 	}
-	
-	private void setSeekbarToBookmarkPosition() {
-		if(this.currentAudiobookBean.getBookmark() != null)
-		{
-			this.seekbar.setProgress(this.currentAudiobookBean.getBookmark().getPlaybackPosition());
-		}
-	}
-
-	private void startPlayOnAutoplay() {
-		if(this.appContext.getSettings().isAutoplay()){
-			this.mediaPlayer.start();
-		}
-	}
-	
-	private OnPreparedListener nextTrackPreparedListener = new OnPreparedListener() {
-		
-		@Override
-		public void onPrepared(MediaPlayer mp) {
-			setSeekbar();
-			setDurationIndicator();
-			startPlayback();
-		}
-
-	};
-	
-	private void setSeekbar() {
-		seekbar.setMax(mediaPlayer.getDuration());
-		seekbar.setProgress(0);
-	}
-
-    private OnCompletionListener trackFinishedListener = new OnCompletionListener() {
-		
-		@Override
-		public void onCompletion(MediaPlayer mp) {
-			setNextTrack();
-		}
-
-	};
 	
 	private OnSeekBarChangeListener onSeekbarDragListener = new OnSeekBarChangeListener() {
 
@@ -244,34 +156,25 @@ public class PlayActivity extends Activity {
 
 		@Override
 		public void onStartTrackingTouch(SeekBar seekBar) {
-			this.wasPlaying = mediaPlayer.isPlaying();
-			mediaPlayer.pause();
+			if(isBound)
+			{
+				this.wasPlaying = playbackServiceBinder.isPlaying();
+				playbackServiceBinder.pausePlayback();
+			}
 		}
 
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
-			mediaPlayer.seekTo(seekBar.getProgress());
-			if(this.wasPlaying) startPlayback();
+			if(isBound)
+			{
+				playbackServiceBinder.setPlaybackPosisition(seekBar.getProgress());
+				if(this.wasPlaying) playbackServiceBinder.resumePlayback();
+			}
 		}
 		
 	};
 
 	
-	private void setPreveriousTrack() {
-		this.currentAudiobookBean.setPreviousTrack();
-	}
-	
-	private void setNextTrack() {
-		this.currentAudiobookBean.setNextTrack();
-	}
-
-	private void switchTrack() {
-		setNewDataSource();
-		setCurrentTrackNameIndikator();
-		this.mediaPlayer.setOnPreparedListener(this.nextTrackPreparedListener);
-		this.mediaPlayer.prepareAsync();
-	}
-
 	private void setCurrentTrackNameIndikator() {
 		TextView text = (TextView) findViewById(R.id.text_currentTrack);
 		text.setText(this.currentAudiobookBean.getCurrentTrackName());
@@ -300,69 +203,67 @@ public class PlayActivity extends Activity {
 		
 		@Override
 		public void onClick(View v) {
-			setNextTrack();
-		}
-	};
-	
-	private OnClickListener playButtonClickListener = new OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			if(mediaPlayer.isPlaying()){
-				pausePlayback();
-			} else {
-				startPlayback();
+			if(isBound)
+			{
+				playbackServiceBinder.nextTrack();
 			}
 		}
 	};
 	
-	private void startPlayback() {
-		mediaPlayer.start();
-		((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_pause);
-	}
-	
-	private void pausePlayback() {
-		mediaPlayer.pause();
-		((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_play);
-	}
+	private OnClickListener playButtonClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (isBound) {
+				if (playbackServiceBinder.isPlaying()) {
+					playbackServiceBinder.pausePlayback();
+				} else {
+					playbackServiceBinder.resumePlayback();
+				}
+			}
+		}
+	};
 	
 	private OnClickListener prevButtonClickListener = new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-			setPreveriousTrack();
+			if(isBound)
+			{
+				playbackServiceBinder.prevTrack();
+			}
 		}
 	};
 	
     @Override
     protected void onPause() {
     	super.onPause();
-    	createOrUpdateBookmark();
-    	this.mediaPlayer.stop();
-    	this.mediaPlayer.release();
-    	this.mediaPlayer = null;
+//    	createOrUpdateBookmark();
+//    	this.mediaPlayer.stop();
+//    	this.mediaPlayer.release();
+//    	this.mediaPlayer = null;
     }
 
-	private void createOrUpdateBookmark() {
-		if(this.currentAudiobookBean.getBookmark() != null)
-		{
-			this.currentAudiobookBean.getBookmark().setTrackNumber(this.currentAudiobookBean.getCurrentTrack());
-			this.currentAudiobookBean.getBookmark().setPlaybackPosition(this.mediaPlayer.getCurrentPosition());
-		} else {
-			this.currentAudiobookBean.setBookmark(new Bookmark(this.currentAudiobookBean.getName(), this.currentAudiobookBean.getCurrentTrack(), this.mediaPlayer.getCurrentPosition()));
-		}
-		storeBookmark();
-	}
+//	private void createOrUpdateBookmark() {
+//		if(this.currentAudiobookBean.getBookmark() != null)
+//		{
+//			this.currentAudiobookBean.getBookmark().setTrackNumber(this.currentAudiobookBean.getCurrentTrack());
+//			this.currentAudiobookBean.getBookmark().setPlaybackPosition(this.mediaPlayer.getCurrentPosition());
+//		} else {
+//			this.currentAudiobookBean.setBookmark(new Bookmark(this.currentAudiobookBean.getName(), this.currentAudiobookBean.getCurrentTrack(), this.mediaPlayer.getCurrentPosition()));
+//		}
+//		storeBookmark();
+//	}
 
-	private void storeBookmark() {
-		if(this.databaseManager != null)
-		{
-			AsyncStoreBookmark storeBookmarkTask = new AsyncStoreBookmark(this.databaseManager);
-			storeBookmarkTask.doInBackground(this.currentAudiobookBean.getBookmark());
-		} else {
-			String string = getString(R.string.no_databasemanager);
-			Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
-			Log.e(TAG, string);
-		}
-	}
+//	private void storeBookmark() {
+//		if(this.databaseManager != null)
+//		{
+//			AsyncStoreBookmark storeBookmarkTask = new AsyncStoreBookmark(this.databaseManager);
+//			storeBookmarkTask.doInBackground(this.currentAudiobookBean.getBookmark());
+//		} else {
+//			String string = getString(R.string.no_databasemanager);
+//			Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
+//			Log.e(TAG, string);
+//		}
+//	}
 }
