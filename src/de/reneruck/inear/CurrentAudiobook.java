@@ -10,12 +10,12 @@ public class CurrentAudiobook {
 	private List<String> playlist;
 	private int track = 0;
 	private Bookmark bookmark;
-	private AppContext appContext;
+	private String audiobooksBaseDir;
 
 	private PropertyChangeSupport changes = new PropertyChangeSupport(this);
 
-	public CurrentAudiobook(AppContext context, String name) {
-		this.appContext = context;
+	public CurrentAudiobook(String name, String audiobooksBaseDir) {
+		this.audiobooksBaseDir = audiobooksBaseDir;
 		this.name = name;
 	}
 
@@ -71,7 +71,7 @@ public class CurrentAudiobook {
 
 	public String getCurrentTrackName() {
 		String string = this.playlist.get(this.track);
-		return string.replace(this.appContext.getAudiobokkBaseDir(), " ").trim();
+		return string.replace(this.audiobooksBaseDir, " ").trim();
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {

@@ -2,9 +2,7 @@ package de.reneruck.inear.mediaservice;
 
 import java.util.List;
 
-import android.os.IBinder;
-
-public interface PlaybackServiceControl extends IBinder {
+public interface PlaybackServiceControl {
 
 	public int getCurrentPlaybackPosition();
 	public int getCurrentTrack();
@@ -22,4 +20,5 @@ public interface PlaybackServiceControl extends IBinder {
 	
 	public boolean isPlaying();
 	public int getDuration();
+	public String getCurrentTrackName();
 }

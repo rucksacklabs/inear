@@ -1,22 +1,13 @@
 package de.reneruck.inear;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
-
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,22 +16,16 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
-import de.reneruck.inear.db.AsyncStoreBookmark;
-import de.reneruck.inear.db.DatabaseManager;
 import de.reneruck.inear.mediaservice.PlaybackService;
 import de.reneruck.inear.mediaservice.PlaybackServiceControl;
-import de.reneruck.inear.mediaservice.PlaybackServiceControlImpl;
 
 public class PlayActivity extends Activity {
 
     private static final String TAG = "PlayActivity";
 	private AppContext appContext;
-	private DatabaseManager databaseManager;
 	private SeekBar seekbar;
 	private Thread seekbarUpdateThread;
 	private CurrentAudiobook currentAudiobookBean;
-	private Intent playbackServiceIntent;
 	private PlaybackServiceControl playbackServiceBinder;
 	private boolean isBound;
 
@@ -49,7 +34,6 @@ public class PlayActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         this.appContext = (AppContext) getApplicationContext();
-        this.databaseManager = this.appContext.getDatabaseManager();
         
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -57,7 +41,15 @@ public class PlayActivity extends Activity {
         initializePlayControl();
     }
 
-	private void initializeSeekbarUpdateThread() {
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		startSeekbarUpdateThread();
+		bindToPlaybackService();
+	}
+	
+	private void startSeekbarUpdateThread() {
 		this.seekbarUpdateThread = new Thread(new Runnable() {
 			
 			@Override
@@ -76,13 +68,6 @@ public class PlayActivity extends Activity {
 		this.seekbarUpdateThread.start();
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		
-//		initializeSeekbarUpdateThread();
-		bindToPlaybackService();
-	}
 	
 	private ServiceConnection serviceConnection = new ServiceConnection() {
 
@@ -99,12 +84,14 @@ public class PlayActivity extends Activity {
 				playbackServiceBinder = (PlaybackServiceControl)service;
 				isBound = true;
 				playbackServiceBinder.loadCurrentAudiobook();
+				setCurrentTrackNameIndikator();
+				setDurationIndicator();
 			}
 		}
 	};
 	
 	private void bindToPlaybackService() {
-		boolean bindService = bindService(new Intent(getApplicationContext(), PlaybackService.class), this.serviceConnection, Context.BIND_AUTO_CREATE);
+		bindService(new Intent(this, PlaybackService.class), this.serviceConnection, Context.BIND_AUTO_CREATE);
 	}
 
     private void initializePlayControl() {
@@ -176,8 +163,12 @@ public class PlayActivity extends Activity {
 
 	
 	private void setCurrentTrackNameIndikator() {
-		TextView text = (TextView) findViewById(R.id.text_currentTrack);
-		text.setText(this.currentAudiobookBean.getCurrentTrackName());
+		if(this.isBound)
+		{
+			
+			TextView text = (TextView) findViewById(R.id.text_currentTrack);
+			text.setText(this.playbackServiceBinder.getCurrentTrackName());
+		}
 	}
 
 	@Override
@@ -217,8 +208,10 @@ public class PlayActivity extends Activity {
 			if (isBound) {
 				if (playbackServiceBinder.isPlaying()) {
 					playbackServiceBinder.pausePlayback();
+					((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_play);
 				} else {
 					playbackServiceBinder.resumePlayback();
+					((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_pause);
 				}
 			}
 		}
@@ -238,32 +231,6 @@ public class PlayActivity extends Activity {
     @Override
     protected void onPause() {
     	super.onPause();
-//    	createOrUpdateBookmark();
-//    	this.mediaPlayer.stop();
-//    	this.mediaPlayer.release();
-//    	this.mediaPlayer = null;
     }
 
-//	private void createOrUpdateBookmark() {
-//		if(this.currentAudiobookBean.getBookmark() != null)
-//		{
-//			this.currentAudiobookBean.getBookmark().setTrackNumber(this.currentAudiobookBean.getCurrentTrack());
-//			this.currentAudiobookBean.getBookmark().setPlaybackPosition(this.mediaPlayer.getCurrentPosition());
-//		} else {
-//			this.currentAudiobookBean.setBookmark(new Bookmark(this.currentAudiobookBean.getName(), this.currentAudiobookBean.getCurrentTrack(), this.mediaPlayer.getCurrentPosition()));
-//		}
-//		storeBookmark();
-//	}
-
-//	private void storeBookmark() {
-//		if(this.databaseManager != null)
-//		{
-//			AsyncStoreBookmark storeBookmarkTask = new AsyncStoreBookmark(this.databaseManager);
-//			storeBookmarkTask.doInBackground(this.currentAudiobookBean.getBookmark());
-//		} else {
-//			String string = getString(R.string.no_databasemanager);
-//			Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
-//			Log.e(TAG, string);
-//		}
-//	}
 }

@@ -14,6 +14,7 @@ import de.reneruck.inear.CurrentAudiobook;
 
 public class PlaybackService extends Service {
 
+	private static final int START_ID = 666;
 	private MediaPlayer mediaPlayer;
 	private AppContext appContext;
 	private CurrentAudiobook currentAudiobookBean;
@@ -21,18 +22,19 @@ public class PlaybackService extends Service {
 
 	@Override
 	public void onCreate() {
-		this.appContext = (AppContext) getApplicationContext();
 		super.onCreate();
+		this.appContext = (AppContext) getApplicationContext();
+		initializeMediaplayer();
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		initializeMediaplayer();
-		return super.onStartCommand(intent, flags, startId);
+		super.onStartCommand(intent, flags, startId);
+		return START_ID;
 	}
 
 	public void loadCurrentAudiobook() {
-		this.currentAudiobookBean = this.appContext.getCurrentAudiobookBean();
+		this.currentAudiobookBean = this.appContext.getAudiobookBeanFactory().getAudiobookBeanForName(this.appContext.getCurrentAudiobookName());
 		if(this.currentAudiobookBean != null && this.currentAudiobookBean.getBookmark() != null)
 		{
 			setMediaplayerToBookmarkedTrack();
@@ -90,7 +92,11 @@ public class PlaybackService extends Service {
 
 	};
 
-	private void setNextTrack() {
+	public void setPrevTrack() {
+		this.currentAudiobookBean.setPreviousTrack();
+	}
+	
+	public void setNextTrack() {
 		this.currentAudiobookBean.setNextTrack();
 	}
 	
@@ -103,7 +109,6 @@ public class PlaybackService extends Service {
 		{
 			this.mediaPlayer.start();
 		}
-//		((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_pause);
 	}
 
 	public boolean isPlaying() {
@@ -112,11 +117,55 @@ public class PlaybackService extends Service {
 	
 	public void pausePlayback() {
 		mediaPlayer.pause();
-//		((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_play);
 	}
 
 	public void setPlaybackPosotion(int position) {
-		// TODO Auto-generated method stub
-		
+		mediaPlayer.seekTo(position);
 	}
+
+	public int getCurrentPlaybackPosition() {
+		int currentPosition = 0;
+		if(this.mediaPlayer != null) currentPosition = this.mediaPlayer.getCurrentPosition();
+		return currentPosition;
+	}
+
+	public int getCurrentTrack() {
+		return this.currentAudiobookBean.getCurrentTrack();
+	}
+
+	public int getDuration() {
+		if(this.isPrepared)
+		{
+			return this.mediaPlayer.getDuration();
+		} else {
+			return 0;
+		}
+	}
+
+	public String getCurrentTrackName() {
+		return this.currentAudiobookBean.getCurrentTrackName();
+	}
+	
+//	private void createOrUpdateBookmark() {
+//		if(this.currentAudiobookBean.getBookmark() != null)
+//		{
+//			this.currentAudiobookBean.getBookmark().setTrackNumber(this.currentAudiobookBean.getCurrentTrack());
+//			this.currentAudiobookBean.getBookmark().setPlaybackPosition(this.mediaPlayer.getCurrentPosition());
+//		} else {
+//			this.currentAudiobookBean.setBookmark(new Bookmark(this.currentAudiobookBean.getName(), this.currentAudiobookBean.getCurrentTrack(), this.mediaPlayer.getCurrentPosition()));
+//		}
+//		storeBookmark();
+//	}
+//
+//	private void storeBookmark() {
+//		if(this.databaseManager != null)
+//		{
+//			AsyncStoreBookmark storeBookmarkTask = new AsyncStoreBookmark(this.databaseManager);
+//			storeBookmarkTask.doInBackground(this.currentAudiobookBean.getBookmark());
+//		} else {
+//			String string = getString(R.string.no_databasemanager);
+//			Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
+//			Log.e(TAG, string);
+//		}
+//	}
 }

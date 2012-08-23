@@ -97,10 +97,6 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
-		Editor editor = preferences.edit();
-		editor.putString(LAST_PLAYED, this.appContext.getCurrentAudiobookBean().getName());
-		editor.commit();
 	}
     
 }

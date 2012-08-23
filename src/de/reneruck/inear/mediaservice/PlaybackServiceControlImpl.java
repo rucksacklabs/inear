@@ -1,13 +1,11 @@
 package de.reneruck.inear.mediaservice;
 
-import java.io.FileDescriptor;
 import java.util.List;
 
+import android.os.Binder;
 import android.os.IInterface;
-import android.os.Parcel;
-import android.os.RemoteException;
 
-public class PlaybackServiceControlImpl implements PlaybackServiceControl {
+public class PlaybackServiceControlImpl extends Binder implements PlaybackServiceControl  {
 
 	private PlaybackService playbackService;
 
@@ -16,54 +14,14 @@ public class PlaybackServiceControlImpl implements PlaybackServiceControl {
 	}
 
 	@Override
-	public void dump(FileDescriptor fd, String[] args) throws RemoteException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void dumpAsync(FileDescriptor fd, String[] args)
-			throws RemoteException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public String getInterfaceDescriptor() throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public boolean isBinderAlive() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void linkToDeath(DeathRecipient recipient, int flags)
-			throws RemoteException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean pingBinder() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.playbackService != null;
 	}
 
 	@Override
 	public IInterface queryLocalInterface(String descriptor) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public boolean transact(int code, Parcel data, Parcel reply, int flags)
-			throws RemoteException {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
@@ -93,26 +51,22 @@ public class PlaybackServiceControlImpl implements PlaybackServiceControl {
 
 	@Override
 	public void nextTrack() {
-		// TODO Auto-generated method stub
-
+		this.playbackService.setNextTrack();
 	}
 
 	@Override
 	public void prevTrack() {
-		// TODO Auto-generated method stub
-
+		this.playbackService.setPrevTrack();
 	}
 
 	@Override
 	public int getCurrentPlaybackPosition() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.playbackService.getCurrentPlaybackPosition();
 	}
 
 	@Override
 	public int getCurrentTrack() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.playbackService.getCurrentTrack();
 	}
 
 	@Override
@@ -149,7 +103,12 @@ public class PlaybackServiceControlImpl implements PlaybackServiceControl {
 
 	@Override
 	public int getDuration() {
-		return 0;
+		return this.playbackService.getDuration();
+	}
+
+	@Override
+	public String getCurrentTrackName() {
+		return this.playbackService.getCurrentTrackName();
 	}
 
 }
