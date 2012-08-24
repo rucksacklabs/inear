@@ -145,6 +145,10 @@ public class PlaybackService extends Service {
 	public String getCurrentTrackName() {
 		return this.currentAudiobookBean.getCurrentTrackName();
 	}
+
+	public CurrentAudiobook getCurrentAudiobook() {
+		return null;
+	}
 	
 //	private void createOrUpdateBookmark() {
 //		if(this.currentAudiobookBean.getBookmark() != null)

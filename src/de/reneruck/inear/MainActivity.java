@@ -36,7 +36,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
     	super.onResume();
-    	this.appContext.readSettings();
     	this.audioBooksBaseDir = new File(this.appContext.getAudiobokkBaseDir());
     	
     	if(this.audioBooksBaseDir != null && this.audioBooksBaseDir.exists())

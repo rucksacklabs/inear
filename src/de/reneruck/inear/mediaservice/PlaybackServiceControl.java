@@ -2,6 +2,8 @@ package de.reneruck.inear.mediaservice;
 
 import java.util.List;
 
+import de.reneruck.inear.CurrentAudiobook;
+
 public interface PlaybackServiceControl {
 
 	public int getCurrentPlaybackPosition();
@@ -21,4 +23,5 @@ public interface PlaybackServiceControl {
 	public boolean isPlaying();
 	public int getDuration();
 	public String getCurrentTrackName();
+	public CurrentAudiobook getCurrentAudiobookBean();
 }

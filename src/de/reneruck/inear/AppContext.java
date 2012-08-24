@@ -1,24 +1,16 @@
 package de.reneruck.inear;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import de.reneruck.inear.db.AsyncGetBookmark;
 import de.reneruck.inear.db.DatabaseManager;
 import de.reneruck.inear.file.FileScanner;
 import de.reneruck.inear.mediaservice.PlaybackService;
+import de.reneruck.inear.mediaservice.PlaybackServiceControl;
 
 
 public class AppContext extends Application {
@@ -29,19 +21,60 @@ public class AppContext extends Application {
 
 	private DatabaseManager databaseManager;
 	private Settings settings;
-
-	private String currentAudiobookName;
-
 	private CurrentAudiobook currentAudiobookBean;
+	private boolean isBound;
+	private PlaybackServiceControl playbackService;
+
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		this.databaseManager = new DatabaseManager(this);
+		readSettings();
 		startService(new Intent(this, PlaybackService.class));
+		bindToPlaybackService();
 	}
 	
+	private void bindToPlaybackService() {
+		bindService(new Intent(this, PlaybackService.class), this.serviceConnection, 0);
+	}
+	
+	private ServiceConnection serviceConnection = new ServiceConnection() {
+		
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			handleServiceUnbound();
+		}
+
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			handleServiceBound(service);
+			getCurrentAudiobookFromService();
+		}
+	};
+	
+	private void getCurrentAudiobookFromService() {
+		if(this.isBound)
+		{
+			this.currentAudiobookBean = this.playbackService.getCurrentAudiobookBean();
+		}
+	}
+	
+	private void handleServiceBound(IBinder service) {
+		if(service instanceof PlaybackServiceControl) {
+			this.playbackService = (PlaybackServiceControl) service;
+			this.isBound = true;
+		}
+	}
+	
+	private void handleServiceUnbound() {
+		this.isBound = false;
+		this.playbackService = null;
+	}
+
 	public void readSettings() {
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		this.audiobookBaseDir = sharedPref.getString("pref_base_dir", getString(R.string.pref_base_dir_default));
