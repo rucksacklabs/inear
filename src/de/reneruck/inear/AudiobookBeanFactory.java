@@ -10,23 +10,27 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.util.Log;
+
 import de.reneruck.inear.db.AsyncGetBookmark;
 import de.reneruck.inear.db.DatabaseManager;
 
 public class AudiobookBeanFactory {
 
+	private static final String TAG = "InEar - AudiobookBeanFactory";
 	private String audiobookName;
 	private String audiobookBaseDir;
 	private CurrentAudiobook currentAudiobookBean;
 	private DatabaseManager databaseManager;
 
-	public AudiobookBeanFactory(String audibooksBaseDir, DatabaseManager databaseManager) {
-		this.audiobookBaseDir = audibooksBaseDir;
+	public AudiobookBeanFactory(String audiobooksBaseDir, DatabaseManager databaseManager) {
+		this.audiobookBaseDir = audiobooksBaseDir;
 		this.databaseManager = databaseManager;
 	}
 	
 	public CurrentAudiobook getAudiobookBeanForName(String name)
 	{
+		Log.d(TAG, "Building Bean for " + name);
 		this.audiobookName = name;
 		readCurrentAduiobookValues(this.audiobookName);
 		readPlaylistForCurrentAudiobook();

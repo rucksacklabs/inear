@@ -3,11 +3,11 @@ package de.reneruck.inear;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,7 +25,6 @@ public class PlayActivity extends Activity {
 	private AppContext appContext;
 	private SeekBar seekbar;
 	private Thread seekbarUpdateThread;
-	private CurrentAudiobook currentAudiobookBean;
 	private PlaybackServiceControl playbackServiceBinder;
 	private boolean isBound;
 
@@ -45,10 +44,18 @@ public class PlayActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		
+		playbackServiceSetup();
 		startSeekbarUpdateThread();
-		bindToPlaybackService();
 	}
 	
+	private void playbackServiceSetup() {
+		if(!this.appContext.isPlaybackServiceRunning())
+		{
+			startService(new Intent(getApplicationContext(), PlaybackService.class));
+		}
+		bindToPlaybackService();
+	}
+
 	private void startSeekbarUpdateThread() {
 		this.seekbarUpdateThread = new Thread(new Runnable() {
 			
@@ -73,6 +80,7 @@ public class PlayActivity extends Activity {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
+			Log.d(TAG, "Unbound from playback service");
 			isBound = false;
 			playbackServiceBinder = null;
 		}
@@ -81,9 +89,9 @@ public class PlayActivity extends Activity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			if(service instanceof PlaybackServiceControl)
 			{
+				Log.d(TAG, "Bound to playback service");
 				playbackServiceBinder = (PlaybackServiceControl)service;
 				isBound = true;
-				playbackServiceBinder.loadCurrentAudiobook();
 				setCurrentTrackNameIndikator();
 				setDurationIndicator();
 			}
@@ -91,7 +99,7 @@ public class PlayActivity extends Activity {
 	};
 	
 	private void bindToPlaybackService() {
-		bindService(new Intent(this, PlaybackService.class), this.serviceConnection, Context.BIND_AUTO_CREATE);
+		bindService(new Intent(this, PlaybackService.class), this.serviceConnection, 0);
 	}
 
     private void initializePlayControl() {
@@ -165,7 +173,6 @@ public class PlayActivity extends Activity {
 	private void setCurrentTrackNameIndikator() {
 		if(this.isBound)
 		{
-			
 			TextView text = (TextView) findViewById(R.id.text_currentTrack);
 			text.setText(this.playbackServiceBinder.getCurrentTrackName());
 		}
@@ -213,6 +220,8 @@ public class PlayActivity extends Activity {
 					playbackServiceBinder.resumePlayback();
 					((ImageView)findViewById(R.id.button_play)).setImageResource(android.R.drawable.ic_media_pause);
 				}
+			} else {
+				Log.w(TAG, "No connection to playback service");
 			}
 		}
 	};

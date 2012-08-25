@@ -1,16 +1,17 @@
 package de.reneruck.inear;
 
+import java.util.List;
+
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Application;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import de.reneruck.inear.db.DatabaseManager;
 import de.reneruck.inear.file.FileScanner;
 import de.reneruck.inear.mediaservice.PlaybackService;
-import de.reneruck.inear.mediaservice.PlaybackServiceControl;
 
 
 public class AppContext extends Application {
@@ -22,57 +23,20 @@ public class AppContext extends Application {
 	private DatabaseManager databaseManager;
 	private Settings settings;
 	private CurrentAudiobook currentAudiobookBean;
-	private boolean isBound;
-	private PlaybackServiceControl playbackService;
-
+	private AudiobookBeanFactory audiobookBeanFactory;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		this.databaseManager = new DatabaseManager(this);
+		
 		readSettings();
-		startService(new Intent(this, PlaybackService.class));
-		bindToPlaybackService();
+		initAudiobookBeanFactory();
 	}
 	
-	private void bindToPlaybackService() {
-		bindService(new Intent(this, PlaybackService.class), this.serviceConnection, 0);
-	}
-	
-	private ServiceConnection serviceConnection = new ServiceConnection() {
-		
-
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			handleServiceUnbound();
-		}
-
-		
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			handleServiceBound(service);
-			getCurrentAudiobookFromService();
-		}
-	};
-	
-	private void getCurrentAudiobookFromService() {
-		if(this.isBound)
-		{
-			this.currentAudiobookBean = this.playbackService.getCurrentAudiobookBean();
-		}
-	}
-	
-	private void handleServiceBound(IBinder service) {
-		if(service instanceof PlaybackServiceControl) {
-			this.playbackService = (PlaybackServiceControl) service;
-			this.isBound = true;
-		}
-	}
-	
-	private void handleServiceUnbound() {
-		this.isBound = false;
-		this.playbackService = null;
+	private void initAudiobookBeanFactory() {
+		this.audiobookBeanFactory = new AudiobookBeanFactory(this.audiobookBaseDir, this.databaseManager);
 	}
 
 	public void readSettings() {
@@ -88,9 +52,17 @@ public class AppContext extends Application {
 	}
 	
 	public void setCurrentAudiobook(String currentAudiobook) {
-		this.currentAudiobookName = currentAudiobook;
+		if(this.currentAudiobookBean == null || this.currentAudiobookBean.getName().equals(currentAudiobook))
+		{
+			this.currentAudiobookBean = this.audiobookBeanFactory.getAudiobookBeanForName(currentAudiobook);
+		} else {
+			Log.d(TAG, currentAudiobook + " already loaded, nothing to do");
+		}
 	}
-
+	
+	public void setCurrentAudiobook(CurrentAudiobook currentAudiobook) {
+		this.currentAudiobookBean = currentAudiobook;
+	}
 
 	public String getAudiobokkBaseDir() {
 		return this.audiobookBaseDir;
@@ -119,11 +91,15 @@ public class AppContext extends Application {
 		this.settings = settings;
 	}
 
-	public String getCurrentAudiobookName() {
-		return currentAudiobookName;
-	}
+	public boolean isPlaybackServiceRunning(){
+        final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        final List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
 
-	public void setCurrentAudiobookName(String currentAudiobookName) {
-		this.currentAudiobookName = currentAudiobookName;
-	}
+        for (RunningServiceInfo runningServiceInfo : services) {
+            if (runningServiceInfo.service.getClassName().equals(PlaybackService.class.getName())){
+                return true;
+            }
+        }
+        return false;
+     }
 }

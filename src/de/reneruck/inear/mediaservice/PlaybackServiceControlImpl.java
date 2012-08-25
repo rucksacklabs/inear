@@ -2,8 +2,6 @@ package de.reneruck.inear.mediaservice;
 
 import java.util.List;
 
-import de.reneruck.inear.CurrentAudiobook;
-
 import android.os.Binder;
 import android.os.IInterface;
 
@@ -112,10 +110,4 @@ public class PlaybackServiceControlImpl extends Binder implements PlaybackServic
 	public String getCurrentTrackName() {
 		return this.playbackService.getCurrentTrackName();
 	}
-
-	@Override
-	public CurrentAudiobook getCurrentAudiobookBean() {
-		return this.playbackService.getCurrentAudiobook();
-	}
-
 }
